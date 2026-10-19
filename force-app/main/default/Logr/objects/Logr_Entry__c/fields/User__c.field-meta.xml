@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>User__c</fullName>
+    <description>Salesforce username of the running user who generated the log entry, preserved across Platform Event publishing and external exports.</description>
+    <externalId>false</externalId>
+    <inlineHelpText>Running user username captured via UserInfo.getUserName() at the time of logging.</inlineHelpText>
+    <label>User</label>
+    <length>80</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

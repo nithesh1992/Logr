@@ -1,0 +1,21 @@
+{
+  "packageDirectories": [
+    {
+      "versionName": "v1.1",
+      "versionNumber": "1.1.0.NEXT",
+      "path": "force-app/main/default/Logr",
+      "default": true,
+      "package": "Logr",
+      "versionDescription": "Lean, general-purpose Salesforce logging and telemetry framework for Apex, Flow, and LWC."
+    }
+  ],
+  "name": "Logr",
+  "namespace": "",
+  "sfdcLoginUrl": "https://login.salesforce.com",
+  "sourceApiVersion": "68.0",
+  "packageAliases": {
+    "Logr": "0Hog70000004Fy9CAE",
+    "Logr@1.0.0-1": "04tg7000000ZBYTAA4",
+    "Logr@1.1.0-1": "04tg7000000ZCRJAA4"
+  }
+}

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Regex__c</fullName>
+    <description
+  >Regular expression pattern used to identify sensitive data in log messages and stack traces.</description>
+    <externalId>false</externalId>
+    <fieldManageability>SubscriberControlled</fieldManageability>
+    <inlineHelpText
+  >Apex-compatible regular expression pattern to match sensitive values for redaction.</inlineHelpText>
+    <label>Regex</label>
+    <length>255</length>
+    <required>true</required>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

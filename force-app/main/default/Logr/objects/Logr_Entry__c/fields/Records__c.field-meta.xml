@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Records__c</fullName>
+    <description>Single or comma-separated Salesforce record IDs or external correlation identifiers associated with this log entry. Indexed as an External ID for fast SOQL lookups.</description>
+    <externalId>true</externalId>
+    <inlineHelpText>Related Salesforce record IDs or correlation keys (up to 255 characters). Larger lists overflow into Body.</inlineHelpText>
+    <label>Records</label>
+    <length>255</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Mask_Data__c</fullName>
+    <defaultValue>true</defaultValue>
+    <description
+  >When enabled, active Logr Data Mask Rule patterns scrub sensitive PII from Body and Stack Trace before saving.</description>
+    <inlineHelpText
+  >Apply active regex data masking rules before persisting log entries.</inlineHelpText>
+    <label>Mask Data</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

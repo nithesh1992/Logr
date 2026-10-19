@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Governor_Limits__c</fullName>
+    <description>Compact snapshot of elapsed execution time, CPU time, SOQL queries, DML statements, and heap size captured when the log was saved.</description>
+    <externalId>false</externalId>
+    <inlineHelpText>Snapshot of elapsed time and Salesforce governor limits (CPU, SOQL, DML, Heap) at save time.</inlineHelpText>
+    <label>Governor Limits</label>
+    <length>255</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

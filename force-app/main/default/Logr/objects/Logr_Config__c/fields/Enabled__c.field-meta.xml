@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Enabled__c</fullName>
+    <defaultValue>true</defaultValue>
+    <description
+  >Master switch to enable or disable Logr persistence for the org, profile, or user.</description>
+    <inlineHelpText
+  >When checked, Logr persists log entries. Uncheck to disable logging for the target hierarchy level.</inlineHelpText>
+    <label>Enabled</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Default_Save_Mode__c</fullName>
+    <defaultValue>&quot;EVENT&quot;</defaultValue>
+    <description
+  >Default persistence mechanism when save() is called without an explicit SaveMode (EVENT or DIRECT).</description>
+    <externalId>false</externalId>
+    <inlineHelpText
+  >Enter EVENT (Platform Event, rollback-safe) or DIRECT (synchronous DML insert). Defaults to EVENT.</inlineHelpText>
+    <label>Default Save Mode</label>
+    <length>20</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

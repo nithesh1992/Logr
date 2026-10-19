@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Flush_Debug_On_Error__c</fullName>
+    <defaultValue>true</defaultValue>
+    <description
+  >When enabled, in-memory DEBUG and FINE steps are automatically included in Body if the unit of work logs an ERROR, even when Level is set to INFO or WARN.</description>
+    <inlineHelpText
+  >Include buffered DEBUG and FINE steps automatically whenever an ERROR occurs in the unit of work.</inlineHelpText>
+    <label>Flush Debug On Error</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

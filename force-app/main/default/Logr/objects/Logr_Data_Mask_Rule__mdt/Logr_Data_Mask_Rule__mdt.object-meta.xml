@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description
+  >The Logr Data Mask Rule custom metadata type defines regular expression scrubbing patterns applied to log bodies and stack traces before persistence. Key attributes include Regex, Replacement, Is Active, and Sort Order. Commonly used for redacting PII and sensitive credentials from application logs.</description>
+    <label>Logr Data Mask Rule</label>
+    <pluralLabel>Logr Data Mask Rules</pluralLabel>
+    <visibility>Public</visibility>
+</CustomObject>
