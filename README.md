@@ -232,14 +232,6 @@ force-app/main/default/Logr/
 └── permissionsets/              Logr_Admin · Logr_User
 ```
 
-## Roadmap ideas (proposed, none promised)
-
-1. Check `SaveResult`s in `LogrEventHandler` and surface failures.
-2. Mask `Subject__c`; make masking fail closed instead of open.
-3. Add a transaction ID (`Request.getCurrent().getRequestId()`).
-4. Validate `saveClientLog` input and cap its rate.
-5. Optional live-stream LWC capped to protect event allocation.
-
 ## License
 
 MIT. See [LICENSE](LICENSE).
