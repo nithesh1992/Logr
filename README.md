@@ -69,7 +69,7 @@ Logr stands on good work by others. [Nebula Logger](https://github.com/jongpie/N
 | **Log purging** | Yes (batch, retention days, empties recycle bin) | Yes (nightly batch) | Yes (retention date + batch) | Yes (cleanup jobs) |
 | **Data masking** | **Yes** (regex rules in metadata, on by default) | Yes (regex rules, first 2,000 chars) | Yes (rules in metadata) | Yes |
 
-Sizes and features come from reading each repository (on 2026-10-20). Check them again before you rely on this comparision.
+Sizes and features come from reading each repository (on 2026-10-20). Check them again before you rely on this comparison.
 
 - **Choose Logr** when you want a small, general-purpose logger with a clear trace per transaction. 
 - **Choose Bolt Logger** when you only need lightweight error logging. It is smaller than Logr and does that one job well. 
