@@ -1,4 +1,4 @@
-import Logr, { createLogr, logError, logInfo } from "c/logr";
+import Logr from "c/logr";
 import saveClientLog from "@salesforce/apex/Logr.saveClientLog";
 
 jest.mock(
@@ -208,38 +208,6 @@ describe("c/logr", () => {
       await expect(Logr.start("Disabled").info("x").save()).resolves.toBe(
         false
       );
-    });
-  });
-
-  describe("deprecated v1.1.0 helpers", () => {
-    it("still supports createLogr(), logError() and logInfo()", async () => {
-      await createLogr("Legacy").info("ok").save();
-      expect(lastCall().subject).toBe("Legacy");
-
-      await logError({
-        subject: "Payment Crash",
-        error: new TypeError("boom"),
-        source: "paymentForm",
-        tags: ["Payment", "UI"],
-        recordId: "a01A",
-        saveMode: "DIRECT"
-      });
-      let args = lastCall();
-      expect(args.level).toBe("ERROR");
-      expect(args.source).toBe("paymentForm");
-      expect(args.tags).toBe("Payment, UI");
-      expect(args.stackTrace).toContain("TypeError");
-      expect(args.saveMode).toBe("DIRECT");
-
-      await logInfo({
-        subject: "Payment Initiated",
-        message: "Clicked submit",
-        tags: "Payment"
-      });
-      args = lastCall();
-      expect(args.level).toBe("INFO");
-      expect(args.subject).toBe("Payment Initiated");
-      expect(args.message).toContain("Clicked submit");
     });
   });
 });
