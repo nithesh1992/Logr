@@ -1,0 +1,48 @@
+.playground-shell {
+  display: block;
+}
+
+.subtitle-text {
+  color: var(--slds-g-color-neutral-base-40, #5c5c5c);
+}
+
+.section-box {
+  border: 1px solid var(--slds-g-color-border-base-1, #e5e5e5);
+  border-radius: var(--slds-g-radius-border-2, 0.5rem);
+  padding: var(--slds-g-spacing-4, 1rem);
+  background: var(--slds-g-color-neutral-base-100, #ffffff);
+}
+
+.scenario-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--slds-g-spacing-2, 0.5rem);
+}
+
+.code-preview {
+  margin: 0;
+  padding: var(--slds-g-spacing-3, 0.75rem);
+  border-radius: var(--slds-g-radius-border-2, 0.5rem);
+  background: var(--slds-g-color-neutral-base-15, #181818);
+  color: var(--slds-g-color-neutral-base-95, #f3f3f3);
+  font-family: monospace;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+.activity-list {
+  max-height: 16rem;
+  overflow-y: auto;
+}
+
+.badge-saved {
+  --slds-c-badge-color-background: var(--slds-g-color-success-base-40, #2e844a);
+  --slds-c-badge-text-color: var(--slds-g-color-neutral-base-100, #ffffff);
+}
+
+.badge-skipped {
+  --slds-c-badge-color-background: var(--slds-g-color-warning-base-50, #dd7a01);
+  --slds-c-badge-text-color: var(--slds-g-color-neutral-base-100, #ffffff);
+}

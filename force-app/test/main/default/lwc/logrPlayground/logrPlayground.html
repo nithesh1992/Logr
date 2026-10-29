@@ -1,0 +1,232 @@
+<template>
+  <div class="playground-shell">
+    <lightning-card title="Logr LWC Playground" icon-name="utility:bug">
+      <div slot="actions">
+        <lightning-button
+          label="Open Log Entries"
+          icon-name="utility:new_window"
+          onclick={handleOpenLogEntries}
+        ></lightning-button>
+      </div>
+
+      <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+        <p class="slds-text-body_regular slds-m-bottom_medium subtitle-text">
+          Trigger real client-to-server logs through <code>c/logr</code> to
+          verify multi-step chains, stack trace capture, PII masking, and save
+          modes end-to-end.
+        </p>
+
+        <!-- One-Click Preset Scenarios -->
+        <div class="section-box slds-m-bottom_medium">
+          <h2 class="slds-text-heading_small slds-m-bottom_xs">
+            One-Click Preset Scenarios
+          </h2>
+          <p class="slds-text-body_small slds-m-bottom_small subtitle-text">
+            Each button runs a complete
+            <code>Logr.start(...)...save()</code> chain against the org.
+          </p>
+          <div class="scenario-grid">
+            <lightning-button
+              variant="neutral"
+              label="1. Checkout Telemetry (INFO + DEBUG)"
+              icon-name="utility:info"
+              data-scenario="telemetry"
+              onclick={handleScenarioClick}
+              disabled={isBusy}
+            ></lightning-button>
+            <lightning-button
+              variant="neutral"
+              label="2. Slow API Warning (WARN)"
+              icon-name="utility:warning"
+              data-scenario="warn"
+              onclick={handleScenarioClick}
+              disabled={isBusy}
+            ></lightning-button>
+            <lightning-button
+              variant="destructive-text"
+              label="3. Caught JS TypeError (ERROR)"
+              icon-name="utility:error"
+              data-scenario="jserror"
+              onclick={handleScenarioClick}
+              disabled={isBusy}
+            ></lightning-button>
+            <lightning-button
+              variant="destructive-text"
+              label="4. Simulated Apex Error (ERROR)"
+              icon-name="utility:apex"
+              data-scenario="apexerror"
+              onclick={handleScenarioClick}
+              disabled={isBusy}
+            ></lightning-button>
+            <lightning-button
+              variant="brand-outline"
+              label="5. PII Regex Masking (INFO)"
+              icon-name="utility:shield"
+              data-scenario="piimask"
+              onclick={handleScenarioClick}
+              disabled={isBusy}
+            ></lightning-button>
+          </div>
+        </div>
+
+        <!-- Custom Chain Builder + Live Code Preview -->
+        <div class="slds-grid slds-wrap slds-gutters">
+          <div class="slds-col slds-size_1-of-1 slds-large-size_7-of-12">
+            <div class="section-box">
+              <h2 class="slds-text-heading_small slds-m-bottom_small">
+                Custom Chain Builder
+              </h2>
+              <div class="slds-grid slds-wrap slds-gutters_x-small">
+                <div
+                  class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-bottom_x-small"
+                >
+                  <lightning-input
+                    label="Subject"
+                    name="subject"
+                    value={subject}
+                    onchange={handleInputChange}
+                    required
+                  ></lightning-input>
+                </div>
+                <div
+                  class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-bottom_x-small"
+                >
+                  <lightning-input
+                    label="Source Component"
+                    name="source"
+                    value={source}
+                    onchange={handleInputChange}
+                  ></lightning-input>
+                </div>
+                <div
+                  class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-bottom_x-small"
+                >
+                  <lightning-combobox
+                    label="Step Level"
+                    name="level"
+                    value={level}
+                    options={levelOptions}
+                    onchange={handleInputChange}
+                  ></lightning-combobox>
+                </div>
+                <div
+                  class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-bottom_x-small"
+                >
+                  <lightning-combobox
+                    label="Save Mode"
+                    name="saveMode"
+                    value={saveMode}
+                    options={saveModeOptions}
+                    onchange={handleInputChange}
+                  ></lightning-combobox>
+                </div>
+                <div
+                  class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-bottom_x-small"
+                >
+                  <lightning-input
+                    label="Tags (comma-separated)"
+                    name="tags"
+                    value={tags}
+                    onchange={handleInputChange}
+                  ></lightning-input>
+                </div>
+                <div
+                  class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-m-bottom_x-small"
+                >
+                  <lightning-input
+                    label="Record ID(s)"
+                    name="recordIds"
+                    value={recordIds}
+                    placeholder="Optional 18-char ID(s)"
+                    onchange={handleInputChange}
+                  ></lightning-input>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-m-bottom_x-small">
+                  <lightning-input
+                    label="Step Message"
+                    name="message"
+                    value={message}
+                    onchange={handleInputChange}
+                  ></lightning-input>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
+                  <lightning-textarea
+                    label="Payload (JSON or text)"
+                    name="payload"
+                    value={payload}
+                    onchange={handleInputChange}
+                  ></lightning-textarea>
+                </div>
+              </div>
+              <div class="slds-m-top_xs">
+                <lightning-button
+                  variant="brand"
+                  label="Send Custom Log"
+                  icon-name="utility:send"
+                  onclick={handleSendCustom}
+                  disabled={isBusy}
+                ></lightning-button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Code Preview & Recent Activity -->
+          <div class="slds-col slds-size_1-of-1 slds-large-size_5-of-12">
+            <div class="section-box slds-m-bottom_medium">
+              <h2 class="slds-text-heading_small slds-m-bottom_xs">
+                Live Chain Preview
+              </h2>
+              <pre class="code-preview"><code>{codePreview}</code></pre>
+            </div>
+
+            <div class="section-box">
+              <div class="slds-grid slds-grid_align-spread slds-m-bottom_xs">
+                <h2 class="slds-text-heading_small">
+                  Session Activity ({historyCount})
+                </h2>
+                <template lwc:if={hasHistory}>
+                  <lightning-button
+                    variant="base"
+                    label="Clear"
+                    onclick={handleClearHistory}
+                  ></lightning-button>
+                </template>
+              </div>
+
+              <template lwc:if={hasHistory}>
+                <ul class="slds-has-dividers_bottom-space activity-list">
+                  <template for:each={history} for:item="entry">
+                    <li key={entry.id} class="slds-item">
+                      <div
+                        class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center"
+                      >
+                        <div>
+                          <span class="slds-text-title_bold"
+                            >{entry.subject}</span
+                          >
+                          <p class="slds-text-body_small subtitle-text">
+                            {entry.time} · {entry.level} · {entry.mode}
+                          </p>
+                        </div>
+                        <lightning-badge
+                          label={entry.statusLabel}
+                          class={entry.badgeClass}
+                        ></lightning-badge>
+                      </div>
+                    </li>
+                  </template>
+                </ul>
+              </template>
+              <template lwc:else>
+                <p class="slds-text-body_small subtitle-text">
+                  No logs sent in this session yet. Click any scenario above or
+                  send a custom log.
+                </p>
+              </template>
+            </div>
+          </div>
+        </div>
+      </div>
+    </lightning-card>
+  </div>
+</template>

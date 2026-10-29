@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description
+  >Interactive playground for testing end-to-end LWC logging with c/logr.</description>
+    <label>Logr Playground</label>
+    <lwcComponent>logrPlayground</lwcComponent>
+    <motif>Custom63: Chip</motif>
+</CustomTab>

@@ -1,10 +1,22 @@
 {
-  "name": "salesforce-app",
+  "name": "logr",
   "private": true,
-  "version": "1.0.0",
-  "description": "Salesforce App",
+  "version": "1.1.0",
+  "description": "Lean, general-purpose Salesforce logging and telemetry framework for Apex, Flow, and LWC.",
+  "license": "MIT",
+  "homepage": "https://nithesh1992.github.io/Logr/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nithesh1992/Logr.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nithesh1992/Logr/issues"
+  },
   "scripts": {
-    "lint": "eslint **/{aura,lwc}/**/*.js",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
+    "lint": "eslint \"**/lwc/**/*.js\"",
     "test": "npm run test:unit",
     "test:unit": "sfdx-lwc-jest",
     "test:unit:watch": "sfdx-lwc-jest --watch",
@@ -28,7 +40,8 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
     "prettier": "^3.5.3",
-    "prettier-plugin-apex": "^2.2.6"
+    "prettier-plugin-apex": "^2.2.6",
+    "vitepress": "^1.6.4"
   },
   "lint-staged": {
     "**/*.{cls,cmp,component,css,html,js,json,md,page,trigger,xml,yaml,yml}": [
@@ -38,7 +51,7 @@
       "eslint"
     ],
     "**/lwc/**": [
-        "sfdx-lwc-jest -- --bail --findRelatedTests --passWithNoTests"
+      "sfdx-lwc-jest -- --bail --findRelatedTests --passWithNoTests"
     ]
   }
 }

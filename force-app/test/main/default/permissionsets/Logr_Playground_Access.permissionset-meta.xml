@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description
+  >Grants visibility to the unpackaged Logr Playground LWC tab for end-to-end testing.</description>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>Logr Playground Access</label>
+    <tabSettings>
+        <tab>Logr_Playground</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+</PermissionSet>

@@ -51,3 +51,8 @@ $RECYCLE.BIN/
 .agents/
 .vscode/mcp.json
 
+# VitePress build and cache
+docs/.vitepress/cache/
+docs/.vitepress/dist/
+
+

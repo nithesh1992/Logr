@@ -7,6 +7,10 @@
       "default": true,
       "package": "Logr",
       "versionDescription": "Lean, general-purpose Salesforce logging and telemetry framework for Apex, Flow, and LWC."
+    },
+    {
+      "path": "force-app/test",
+      "default": false
     }
   ],
   "name": "Logr",

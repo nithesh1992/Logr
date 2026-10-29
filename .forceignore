@@ -13,3 +13,5 @@ package.xml
 
 node_modules/
 .agents/
+docs/
+
