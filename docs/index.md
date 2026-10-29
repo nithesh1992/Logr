@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: "Logr"
-  text: "Lean logging & telemetry for Salesforce."
-  tagline: "One chainable API across Apex, Lightning Web Components, and Flow. Only 4 Apex classes and 1 trigger."
+  text: "One unit of work, one log record."
+  tagline: "A small logging and telemetry framework for Salesforce. Capture steps, callouts, DML outcomes, and exceptions across Apex, LWC, and Flow in one readable record."
   actions:
     - theme: brand
       text: Get Started
@@ -20,89 +20,99 @@ hero:
       link: https://github.com/nithesh1992/Logr
 
 features:
-  - title: Identical Chain in Apex & LWC
-    details: Build multi-step execution traces or one-liners with Logr.start(subject).source(...).tag(...).info(...).error(...).save(). No argument order to memorize.
-  - title: Smart Debug Buffering
-    details: Keep production orgs running at INFO level while buffering FINE and DEBUG steps in memory. If an ERROR occurs in the same transaction, Logr flushes the full trace automatically.
-  - title: Rollback-Safe Platform Events
-    details: Persist logs via Logr_Event__e (PublishImmediately) so diagnostic traces survive Database.rollback() and unhandled exceptions, or switch to direct DML when needed.
-  - title: Declarative PII Data Masking
-    details: Scrub SSNs, credit cards, email addresses, US phone numbers, and IPv4 addresses before DML using Custom Metadata regex rules.
-  - title: Flow Invocable Action
-    details: Drop the Save Logr Entry action onto any Flow normal path or Fault Path. Bulkified across multi-record interviews.
-  - title: Zero Org Bloat
-    details: 4 Apex classes, 1 trigger, 1 custom object, 1 platform event, and 1 LWC module. No Big Objects, no external packages, and an automated retention batch.
+  - title: One Record Per Transaction
+    details: Buffer every step in memory and write a single chronological story instead of scattered child rows.
+  - title: Same Chain in Apex & LWC
+    details: Use the same fluent builder on the server and in the browser, plus a single invocable action in Flow.
+  - title: Flush Debug on Error
+    details: Run quietly at Info level in production and keep verbose Debug steps only when a transaction fails.
+  - title: Survives Rollbacks
+    details: Publish logs through Platform Events so failure traces still land when a transaction rolls back.
+  - title: Callout & DML Summaries
+    details: Record HTTP requests, status codes, and partial DML outcomes with a single method call.
+  - title: Small Enough to Own
+    details: Four Apex classes and one trigger, with regex PII masking, five reports, and a nightly cleanup job built in.
 ---
 
 ## One API Across the Stack
 
-Switch between Apex, Lightning Web Components, and Flow without learning different conventions.
+Read the story of a transaction top to bottom in one place.
 
 ::: code-group
 
 ```apex [Apex]
-Logr log = Logr.start('Order Checkout')
-    .source('OrderService.placeOrder')
-    .tag('Checkout')
-    .recordId(orderRecord.Id);
-
-try {
-    log.info('Validating inventory');
-    log.debug('Request payload', payloadMap);
-    processOrder(orderRecord);
-} catch (Exception ex) {
-    log.error('Checkout failed', ex);
-} finally {
-    log.save();
-}
-```
-
-```javascript [LWC]
-import Logr from 'c/logr';
-
-async handleCheckout() {
-    const log = Logr.start('Customer Checkout')
-        .source('checkoutSummary')
-        .tag('Stripe')
-        .recordId(this.recordId);
+public void processOrder(Order ord, List<OrderItem> items) {
+    Logr log = Logr.start('Process Customer Order').tag('OMS').recordId(ord.Id);
+    log.add('Validated order header');
+    log.debug('Order items', items); // kept only if an ERROR follows
 
     try {
-        log.info('Authorizing card');
-        log.debug('Gateway response', await authorizeCard());
-    } catch (error) {
-        log.error('Payment failed', error);
+        HttpRequest req = SapClient.buildRequest(ord, items);
+        HttpResponse res = new Http().send(req);
+        log.callout('SAP Order Sync', req, res);
+
+        Database.SaveResult[] results = Database.update(items, false);
+        log.dmlResults('Update Order Items', results, items);
+    } catch (Exception ex) {
+        log.error('Order processing failed', ex);
     } finally {
         log.save();
     }
 }
 ```
 
-```bash [Install v1.1.0]
-# Install the Unlocked Package into any org
-sf package install --package 04tg7000000ZCRJAA4 --wait 10 --target-org <org-alias>
+```javascript [LWC]
+import Logr from "c/logr";
 
-# Assign Admin or User permissions
-sf org assign permset --name Logr_Admin --target-org <org-alias>
+async handlePayment() {
+    const log = Logr.start("Customer Checkout")
+        .source("checkoutSummary")
+        .tag("Stripe")
+        .recordId(this.recordId);
+
+    log.info("Initializing payment intent");
+    try {
+        log.debug("Gateway response", await authorizeCard());
+    } catch (error) {
+        log.error("Payment failed", error);
+    } finally {
+        log.save();
+    }
+}
+
+// One-liner:
+Logr.start("Checkout UI Crash").source("checkoutSummary").error(error).save();
+```
+
+```bash [Install v1.1.0]
+# Install the Unlocked Package
+sf package install --package 04tg7000000ZCRJAA4 --target-org <alias> --apex-compile package --wait 10
+
+# Assign Admin permissions
+sf org assign permset --name Logr_Admin --target-org <alias>
 ```
 
 :::
 
-## Why Logr Exists
+## How It Compares
 
-Salesforce teams usually face a trade-off when picking a logging library:
+Logr stands on good work by others. [Nebula Logger](https://github.com/jongpie/NebulaLogger) and [RFLIB](https://github.com/j-fischer/rflib) are mature platforms with features Logr will not match (live stream, archival, notifications, plugins). [Bolt Logger](https://github.com/batra-kapil/Bolt-Logger) showed that a logger can be small. Logr aims at the space between: a general-purpose logger you can read in an afternoon.
 
-- **Nebula Logger** and **RFLIB** are comprehensive enterprise frameworks, but they bring dozens of classes, objects, and Big Object archival pipelines into your org.
-- **BoltLogger** stays very small, but focuses strictly on catching exceptions rather than multi-level telemetry (`FINE` through `ERROR`).
+|                                          | **Logr**                                         | Bolt Logger                          | Nebula Logger                | RFLIB                              |
+| :--------------------------------------- | :----------------------------------------------- | :----------------------------------- | :--------------------------- | :--------------------------------- |
+| **Built for**                            | Traces, callouts, DML and errors                 | Error logging                        | Full logging platform        | Logging plus a wider library suite |
+| **Size (core)**                          | 4 objects, 4 classes                             | 4 objects, 2 classes                 | 15 objects, 42 classes       | 13 objects, 79 classes             |
+| **A transaction becomes**                | **One readable record**                          | One record per error                 | Parent log + child entries   | Log rows                           |
+| **Keeps debug steps when an error hits** | **Yes**                                          | No                                   | Not documented               | Yes                                |
+| **Built-in callout and DML summaries**   | **Yes**                                          | No                                   | Yes                          | Not checked                        |
+| **Live view, archival, alerts**          | No                                               | No                                   | Yes                          | Yes                                |
+| **Log purging**                          | Yes (batch, retention days, empties recycle bin) | Yes (nightly batch)                  | Yes (retention date + batch) | Yes (cleanup jobs)                 |
+| **Data masking**                         | **Yes** (regex rules in metadata, on by default) | Yes (regex rules, first 2,000 chars) | Yes (rules in metadata)      | Yes                                |
 
-Logr sits in the middle: a compact, general-purpose logger that handles both exception tracking and multi-step operational telemetry in **4 Apex classes**.
+- **Choose Logr** when you want a small, general-purpose logger with a clear trace per transaction.
+- **Choose Bolt Logger** when you only need lightweight error logging. It is smaller than Logr and does that one job well.
+- **Choose Nebula or RFLIB** when you need a live stream, archival, alerts, or a large ecosystem.
 
-| Capability                                    | Logr           | Nebula Logger | RFLIB | BoltLogger     |
-| :-------------------------------------------- | :------------- | :------------ | :---- | :------------- |
-| **Apex Classes**                              | **4**          | ~55+          | ~35+  | ~5             |
-| **Multi-Level Telemetry (`FINE` to `ERROR`)** | Yes            | Yes           | Yes   | Error-focused  |
-| **Apex + LWC + Flow Support**                 | Yes            | Yes           | Yes   | Yes            |
-| **Flush `DEBUG` Steps on `ERROR`**            | Yes            | Yes           | Yes   | No             |
-| **Regex PII Data Masking**                    | Yes (5 rules)  | Yes           | No    | No             |
-| **Direct DML + Platform Event Modes**         | Yes            | Yes           | Yes   | Platform Event |
-| **Reports & Dashboard Included**              | Yes (5 + 1)    | Yes           | No    | Yes            |
-| **Big Object Archival**                       | No (by design) | Yes           | Yes   | No             |
+## Why the Name "Logr"?
+
+The name comes from an internal logging utility I built during my time at Sonos. This open-source framework is a ground-up rewrite and much more capable, but it carries forward the core unit-of-work idea from that original tool: a transaction should produce one readable story. Keeping the name is a small nod to where that idea started.

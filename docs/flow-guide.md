@@ -11,23 +11,22 @@ Logr exposes an Invocable Apex Action named **Save Logr Entry** (`Logr.saveFlowL
 
 ## Input Parameters
 
-| Input Label                | API Name       | Required | Description                                                                                                                                                                    |
-| :------------------------- | :------------- | :------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Subject**                | `subject`      | Yes      | Short headline for `Subject__c` (for example, `Opportunity Stage Sync Failed`).                                                                                                |
-| **Message / Step Details** | `message`      | No       | Detailed message or variable snapshot for `Body__c`.                                                                                                                           |
-| **Severity Level**         | `level`        | No       | `FINE`, `DEBUG`, `INFO`, `WARN`, or `ERROR`. Defaults to `INFO` (or `ERROR` when **Flow Fault Message** is populated).                                                         |
-| **Flow / Element Source**  | `source`       | No       | Flow API name and element name (for example, `Opportunity_After_Save.Create_Invoice`). Defaults to `'Flow'`.                                                                   |
-| **Tags (Comma-Separated)** | `tags`         | No       | Comma-separated tags such as `Billing, Flow, Opportunity`.                                                                                                                     |
-| **Related Record ID(s)**   | `recordId`     | No       | Single Record ID (`{!$Record.Id}`) or comma-separated IDs.                                                                                                                     |
-| **Flow Fault Message**     | `faultMessage` | No       | Bind to `{!$Flow.FaultMessage}` on a Fault Path. Automatically escalates severity to `ERROR`, sets `Is_Exception__c = true`, and stores the fault details in `Stack_Trace__c`. |
-| **Save Mode Override**     | `saveMode`     | No       | `DIRECT` or `EVENT`. Leave blank to use the org default (`Logr_Config__c.Default_Save_Mode__c`).                                                                               |
+| Input Label        | API Name       | Required | Description                                                                                                                                     |
+| :----------------- | :------------- | :------- | :---------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Subject**        | `subject`      | Yes      | Short summary of the log entry (for example, `Opportunity Stage Sync Failed`).                                                                  |
+| **Message / Body** | `message`      | No       | Detailed log message or payload for `Body__c`.                                                                                                  |
+| **Level**          | `level`        | No       | `ERROR`, `WARN`, `INFO`, `DEBUG`, or `FINE`. Defaults to `INFO` (or `ERROR` when **Fault Message** is populated).                               |
+| **Source**         | `source`       | No       | Flow API name or step name (for example, `Opportunity_After_Save.Create_Invoice`). Defaults to `'Flow'`.                                        |
+| **Tags**           | `tags`         | No       | Comma-separated tags (for example, `OMS, Checkout`).                                                                                            |
+| **Record ID(s)**   | `recordId`     | No       | Single or comma-separated record or correlation IDs (`{!$Record.Id}`).                                                                          |
+| **Fault Message**  | `faultMessage` | No       | Bind to `{!$Flow.FaultMessage}` when logging a fault path. Forces `ERROR` level, sets `Is_Exception__c = true`, and populates `Stack_Trace__c`. |
+| **Save Mode**      | `saveMode`     | No       | `EVENT` (default) or `DIRECT`. Leave blank to use `Default_Save_Mode__c` from `Logr_Config__c`.                                                 |
 
 ## Output Parameters
 
-| Output Label     | API Name     | Type      | Description                                                                                                                 |
-| :--------------- | :----------- | :-------- | :-------------------------------------------------------------------------------------------------------------------------- |
-| **Is Saved**     | `isSaved`    | `Boolean` | `true` if the log passed the user's `Logr_Config__c` threshold and was queued or inserted; `false` if filtered out.         |
-| **Log Entry ID** | `logEntryId` | `Id`      | Populated with the `Logr_Entry__c.Id` when saved via `DIRECT` mode (`null` when published asynchronously via `EVENT` mode). |
+| Output Label   | API Name    | Type      | Description                                                                                         |
+| :------------- | :---------- | :-------- | :-------------------------------------------------------------------------------------------------- |
+| **Is Success** | `isSuccess` | `Boolean` | Returns `true` when the invocable action completes so the Flow path continues without interruption. |
 
 ## Fault Path Recipe
 
@@ -36,12 +35,12 @@ When a DML element or external callout fails inside a Flow:
 1. Select the failing element (such as **Create Records** or **Update Records**) and click **Add Fault Path**.
 2. On the Fault connector, add the **Save Logr Entry** action:
    - **Subject**: `Invoice Creation Fault`
-   - **Flow / Element Source**: `Order_Fulfillment_Flow.Create_Invoice`
-   - **Related Record ID(s)**: `{!$Record.Id}`
-   - **Flow Fault Message**: `{!$Flow.FaultMessage}`
+   - **Source**: `Order_Fulfillment_Flow.Create_Invoice`
+   - **Record ID(s)**: `{!$Record.Id}`
+   - **Fault Message**: `{!$Flow.FaultMessage}`
    - **Tags**: `Flow, Billing`
-3. Keep **Save Mode Override** blank (or set to `EVENT`) so the log is published via `Logr_Event__e` (`PublishImmediately`) even if the Flow rolls back the transaction.
+3. Keep **Save Mode** blank (or set to `EVENT`) so the log is published via `Logr_Event__e` (`PublishImmediately`) even if the Flow rolls back the transaction.
 
 ## Bulkification Across Interviews
 
-Salesforce automatically batches Invocable Action calls when a Record-Triggered Flow runs on up to 200 records at once. `Logr.saveFlowLogs` processes the entire `List<FlowLogInput>` in a single bulkified `LogrUtil.saveFlowEntries` operation, consuming only 1 DML statement (or 1 `EventBus.publish` call) for the entire batch.
+Salesforce batches Invocable Action calls when a Record-Triggered Flow runs on up to 200 records at once. `Logr.saveFlowLogs` processes the entire `List<FlowLogRequest>` in a single bulkified call, consuming only 1 DML statement or 1 `EventBus.publish` call for the batch.
