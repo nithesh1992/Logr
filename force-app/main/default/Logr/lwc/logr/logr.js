@@ -1,252 +1,350 @@
+/**
+ * c/logr: chainable client-side logger for Lightning Web Components.
+ *
+ * It mirrors the Apex Logr API, so the same pattern works on both sides:
+ *
+ *   import Logr from 'c/logr';
+ *
+ *   const log = Logr.start('Customer Checkout')
+ *     .source('checkoutSummary')
+ *     .tag('Stripe')
+ *     .recordId(this.recordId);
+ *
+ *   log.info('Submitting payment');
+ *   try {
+ *     await authorizeCard();
+ *   } catch (error) {
+ *     log.error('Payment failed', error);
+ *   } finally {
+ *     log.save();
+ *   }
+ *
+ * One-liner:
+ *
+ *   Logr.start('Checkout crashed').source('checkoutSummary').error(error).save();
+ *
+ * Every method returns the logger so calls can be chained, except save(),
+ * saveDirect() and saveViaEvent(). Those return a Promise<boolean> and never
+ * throw, so logging can't break your component.
+ */
 import saveClientLog from "@salesforce/apex/Logr.saveClientLog";
 
 const STEP_DIVIDER = "\n----------\n";
+const DEFAULT_SUBJECT = "Client Log";
+const DEFAULT_SOURCE = "LWC";
+const LEVEL_RANK = { FINE: 1, DEBUG: 2, INFO: 3, WARN: 4, ERROR: 5 };
 
-const LEVEL_RANK = {
-  FINE: 1,
-  DEBUG: 2,
-  INFO: 3,
-  WARN: 4,
-  ERROR: 5
-};
-
-function serializePayload(payload) {
-  if (payload === null || payload === undefined) {
-    return "";
-  }
-  if (typeof payload === "string") {
-    return payload;
-  }
-  if (payload instanceof Error) {
-    return `${payload.name}: ${payload.message}`;
-  }
-  try {
-    return JSON.stringify(payload, null, 2);
-  } catch {
-    return String(payload);
-  }
-}
-
-function extractStackTrace(errorObj) {
-  if (!errorObj) {
-    return null;
-  }
-  if (errorObj instanceof Error && errorObj.stack) {
-    return errorObj.stack;
-  }
-  if (typeof errorObj === "object") {
-    if (errorObj.body && typeof errorObj.body.message === "string") {
-      const stack = errorObj.body.stackTrace
-        ? `\n${errorObj.body.stackTrace}`
-        : "";
-      return `${errorObj.body.exceptionType || "AuraHandledException"}: ${errorObj.body.message}${stack}`;
-    }
-    if (typeof errorObj.stack === "string") {
-      return errorObj.stack;
-    }
-    if (typeof errorObj.message === "string") {
-      return errorObj.message;
-    }
-  }
-  return String(errorObj);
-}
-
-/**
- * Fluent client-side unit-of-work logger for Lightning Web Components.
- */
 export default class Logr {
-  constructor(initialSubject = "Client Log") {
-    this._subject = initialSubject;
-    this._source = "LWC";
+  constructor(subject) {
+    this._subject = subject || DEFAULT_SUBJECT;
+    this._source = DEFAULT_SOURCE;
     this._tags = [];
     this._recordIds = [];
-    this._steps = [];
-    this._highestLevel = "INFO";
-    this._stackTrace = null;
-    this._startMs = Date.now();
+    this._resetSteps();
   }
 
-  static start(initialSubject) {
-    return new Logr(initialSubject);
+  /**
+   * Starts a new logger. Same as `new Logr(subject)`.
+   * @param {string} [subject] Short summary of this unit of work.
+   */
+  static start(subject) {
+    return new Logr(subject);
   }
 
-  subject(newSubject) {
-    this._subject = newSubject;
-    return this;
-  }
+  // ---------------------------------------------------------------------------
+  // Context
+  // ---------------------------------------------------------------------------
 
-  source(componentName) {
-    if (componentName) {
-      this._source = String(componentName).trim();
+  /** Sets or replaces the subject. */
+  subject(text) {
+    if (text) {
+      this._subject = String(text);
     }
     return this;
   }
 
-  tag(tagValue) {
-    if (tagValue) {
-      const trimmed = String(tagValue).trim();
-      if (trimmed && !this._tags.includes(trimmed)) {
-        this._tags.push(trimmed);
-      }
+  /** Names the component or feature that logged this, e.g. 'checkoutSummary'. */
+  source(name) {
+    if (name) {
+      this._source = String(name).trim();
     }
     return this;
   }
 
-  tags(tagArray) {
-    if (Array.isArray(tagArray)) {
-      tagArray.forEach((item) => this.tag(item));
-    }
+  /** Adds one tag. Duplicates and blanks are ignored. */
+  tag(value) {
+    addUnique(this._tags, value);
     return this;
   }
 
-  recordId(idValue) {
-    if (idValue) {
-      const trimmed = String(idValue).trim();
-      if (trimmed && !this._recordIds.includes(trimmed)) {
-        this._recordIds.push(trimmed);
-      }
-    }
+  /** Adds several tags, as an array or a comma-separated string. */
+  tags(values) {
+    toList(values).forEach((value) => this.tag(value));
     return this;
   }
 
-  recordIds(idArray) {
-    if (Array.isArray(idArray)) {
-      idArray.forEach((item) => this.recordId(item));
-    }
+  /** Adds one record or correlation ID. Duplicates and blanks are ignored. */
+  recordId(id) {
+    addUnique(this._recordIds, id);
     return this;
   }
 
-  add(labelOrMessage, optionalPayload) {
-    return this._appendStep("INFO", labelOrMessage, optionalPayload);
+  /** Adds several record IDs, as an array or a comma-separated string. */
+  recordIds(ids) {
+    toList(ids).forEach((id) => this.recordId(id));
+    return this;
   }
 
-  fine(labelOrMessage, optionalPayload) {
-    return this._appendStep("FINE", labelOrMessage, optionalPayload);
+  // ---------------------------------------------------------------------------
+  // Steps. Each takes a message and an optional payload (object, array, etc.)
+  // ---------------------------------------------------------------------------
+
+  fine(message, payload) {
+    return this._addStep("FINE", message, payload);
   }
 
-  debug(labelOrMessage, optionalPayload) {
-    return this._appendStep("DEBUG", labelOrMessage, optionalPayload);
+  debug(message, payload) {
+    return this._addStep("DEBUG", message, payload);
   }
 
-  info(labelOrMessage, optionalPayload) {
-    return this._appendStep("INFO", labelOrMessage, optionalPayload);
+  info(message, payload) {
+    return this._addStep("INFO", message, payload);
   }
 
-  warn(labelOrMessage, optionalPayload) {
-    return this._appendStep("WARN", labelOrMessage, optionalPayload);
+  /** Alias for info(), same as in Apex. */
+  add(message, payload) {
+    return this._addStep("INFO", message, payload);
   }
 
-  error(messageOrError, optionalError) {
-    const errorTarget =
-      optionalError !== undefined ? optionalError : messageOrError;
-    const label = optionalError !== undefined ? String(messageOrError) : null;
-    const extractedStack = extractStackTrace(errorTarget);
-    if (extractedStack) {
-      this._stackTrace = extractedStack;
+  warn(message, payload) {
+    return this._addStep("WARN", message, payload);
+  }
+
+  /**
+   * Logs an error step. Accepts any of:
+   *   .error(error)             a caught error
+   *   .error('Payment failed')  just a message
+   *   .error('Payment failed', error)
+   *
+   * `error` can be a JavaScript Error, an Apex error from an imperative or
+   * wired call ({ body: { message, stackTrace } }), or anything else.
+   */
+  error(messageOrError, error) {
+    const hasLabel = error !== undefined;
+    const caught = hasLabel ? error : messageOrError;
+
+    if (isErrorLike(caught)) {
+      this._stackTrace = stackOf(caught) || this._stackTrace;
     }
-    return this._appendStep(
-      "ERROR",
-      label || serializePayload(messageOrError),
-      optionalError
-    );
+
+    const description = describeError(caught);
+    const message = hasLabel
+      ? [String(messageOrError), description].filter(Boolean).join(": ")
+      : description;
+    return this._addStep("ERROR", message);
   }
 
+  // ---------------------------------------------------------------------------
+  // Saving
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Sends the log to Salesforce. Uses the org's Default Save Mode unless you
+   * pass 'EVENT' or 'DIRECT'. Resolves true on success, false otherwise.
+   * After a successful save the steps are cleared, but the subject, source and
+   * tags are kept so the same logger can be reused.
+   */
   async save(saveMode = null) {
-    const messageBody =
-      this._steps.length > 0
-        ? this._steps.join(STEP_DIVIDER)
-        : this._subject || "Client Log";
-
     try {
-      const result = await saveClientLog({
-        subject: this._subject || "Client Log",
-        message: messageBody,
-        level: this._highestLevel,
+      const saved = await saveClientLog({
+        subject: this._subject,
+        message: this._steps.length
+          ? this._steps.join(STEP_DIVIDER)
+          : this._subject,
+        level: this._level,
         source: this._source,
-        tags: this._tags.length > 0 ? this._tags.join(", ") : null,
-        recordId:
-          this._recordIds.length > 0 ? this._recordIds.join(", ") : null,
+        tags: this._tags.length ? this._tags.join(", ") : null,
+        recordId: this._recordIds.length ? this._recordIds.join(", ") : null,
         stackTrace: this._stackTrace,
         saveMode
       });
-      this._steps = [];
-      return result;
+      if (saved) {
+        this._recordIds = [];
+        this._resetSteps();
+      }
+      return saved === true;
     } catch {
-      // Never allow logger network or server errors to break the calling UI component
+      // Logging must never break the calling component.
       return false;
     }
   }
 
-  async saveDirect() {
+  /** Saves with a direct DML insert into Logr_Entry__c. */
+  saveDirect() {
     return this.save("DIRECT");
   }
 
-  async saveViaEvent() {
+  /** Saves by publishing a Logr_Event__e platform event. */
+  saveViaEvent() {
     return this.save("EVENT");
   }
 
-  _appendStep(levelName, labelOrMessage, optionalPayload) {
-    const normalizedLevel = LEVEL_RANK[levelName] ? levelName : "INFO";
-    if (LEVEL_RANK[normalizedLevel] > LEVEL_RANK[this._highestLevel]) {
-      this._highestLevel = normalizedLevel;
-    }
-    const elapsedMs = Math.max(0, Date.now() - this._startMs);
-    const isoTime = new Date().toISOString().slice(11, 23);
-    const prefix = `[${isoTime} | +${elapsedMs}ms | ${normalizedLevel}] `;
+  // ---------------------------------------------------------------------------
+  // Internals
+  // ---------------------------------------------------------------------------
 
-    let stepText;
-    if (optionalPayload !== undefined) {
-      const serialized = serializePayload(optionalPayload);
-      const separator = serialized.includes("\n") ? ":\n" : ": ";
-      stepText = `${prefix}${labelOrMessage}${separator}${serialized}`;
-    } else {
-      stepText = `${prefix}${serializePayload(labelOrMessage)}`;
+  _addStep(level, message, payload) {
+    if (LEVEL_RANK[level] > LEVEL_RANK[this._level]) {
+      this._level = level;
     }
-    this._steps.push(stepText);
+
+    const elapsedMs = Math.max(0, Date.now() - this._startMs);
+    const time = new Date().toISOString().slice(11, 23);
+    let text = `[${time} | +${elapsedMs}ms | ${level}] ${toText(message)}`;
+
+    if (payload !== undefined) {
+      const payloadText = toText(payload);
+      text += payloadText.includes("\n")
+        ? `:\n${payloadText}`
+        : `: ${payloadText}`;
+    }
+
+    this._steps.push(text);
     return this;
   }
+
+  _resetSteps() {
+    this._steps = [];
+    this._level = "INFO";
+    this._stackTrace = null;
+    this._startMs = Date.now();
+  }
 }
 
+// -----------------------------------------------------------------------------
+// Helpers
+// -----------------------------------------------------------------------------
+
+function toText(value) {
+  if (value === null || value === undefined) {
+    return "";
+  }
+  if (typeof value === "string") {
+    return value;
+  }
+  if (value instanceof Error) {
+    return describeError(value);
+  }
+  try {
+    return JSON.stringify(value, null, 2);
+  } catch {
+    return String(value);
+  }
+}
+
+function toList(values) {
+  if (Array.isArray(values)) {
+    return values;
+  }
+  return typeof values === "string" ? values.split(",") : [];
+}
+
+function addUnique(list, value) {
+  const trimmed =
+    value === null || value === undefined ? "" : String(value).trim();
+  if (trimmed && !list.includes(trimmed)) {
+    list.push(trimmed);
+  }
+}
+
+function isErrorLike(value) {
+  return value !== null && typeof value === "object";
+}
+
+/** Turns an Error, an Apex error response or a string into one readable line. */
+function describeError(error) {
+  if (error === null || error === undefined) {
+    return "";
+  }
+  if (typeof error === "string") {
+    return error;
+  }
+  if (error instanceof Error) {
+    return `${error.name}: ${error.message}`;
+  }
+
+  const body = error.body;
+  if (Array.isArray(body)) {
+    return body
+      .map((item) => item && item.message)
+      .filter(Boolean)
+      .join("; ");
+  }
+  if (body && typeof body.message === "string") {
+    return body.exceptionType
+      ? `${body.exceptionType}: ${body.message}`
+      : body.message;
+  }
+  if (typeof error.message === "string") {
+    return error.message;
+  }
+  return toText(error);
+}
+
+/** Finds the most useful stack trace on an error, if it has one. */
+function stackOf(error) {
+  const body = error.body;
+  if (body && !Array.isArray(body) && typeof body.message === "string") {
+    return body.stackTrace
+      ? `${describeError(error)}\n${body.stackTrace}`
+      : describeError(error);
+  }
+  if (typeof error.stack === "string" && error.stack) {
+    return error.stack;
+  }
+  return describeError(error) || null;
+}
+
+// -----------------------------------------------------------------------------
+// Deprecated helpers from v1.1.0. They still work, so existing components don't
+// break, but new code should use the chain: Logr.start(...)...save()
+// -----------------------------------------------------------------------------
+
+/** @deprecated Use `Logr.start(subject)`. */
 export function createLogr(subject) {
-  return new Logr(subject);
+  return Logr.start(subject);
 }
 
-export async function logError({
+/** @deprecated Use `Logr.start(subject).source(...).error(error).save()`. */
+export function logError({
   subject,
   error,
-  source = "LWC",
-  tags = null,
-  recordId = null,
+  source,
+  tags,
+  recordId,
   saveMode = null
-}) {
-  const logger = new Logr(
-    subject || (error && error.message) || "LWC Error"
-  ).source(source);
-  if (tags) {
-    logger.tags(Array.isArray(tags) ? tags : String(tags).split(","));
-  }
-  if (recordId) {
-    logger.recordId(recordId);
-  }
-  logger.error(subject || "Unhandled LWC Error", error);
-  return logger.save(saveMode);
+} = {}) {
+  return Logr.start(subject || (error && error.message) || "LWC Error")
+    .source(source)
+    .tags(tags)
+    .recordId(recordId)
+    .error(subject || "Unhandled LWC Error", error)
+    .save(saveMode);
 }
 
-export async function logInfo({
+/** @deprecated Use `Logr.start(subject).source(...).info(message).save()`. */
+export function logInfo({
   subject,
   message,
-  source = "LWC",
-  tags = null,
-  recordId = null,
+  source,
+  tags,
+  recordId,
   saveMode = null
-}) {
-  const logger = new Logr(subject || "LWC Info").source(source);
-  if (tags) {
-    logger.tags(Array.isArray(tags) ? tags : String(tags).split(","));
-  }
-  if (recordId) {
-    logger.recordId(recordId);
-  }
-  logger.info(message || subject);
-  return logger.save(saveMode);
+} = {}) {
+  return Logr.start(subject || "LWC Info")
+    .source(source)
+    .tags(tags)
+    .recordId(recordId)
+    .info(message || subject)
+    .save(saveMode);
 }

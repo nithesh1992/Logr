@@ -9,101 +9,237 @@ jest.mock(
   { virtual: true }
 );
 
-describe("c/logr headless logging service", () => {
+const lastCall = () =>
+  saveClientLog.mock.calls[saveClientLog.mock.calls.length - 1][0];
+
+const apexError = (overrides = {}) => ({
+  body: {
+    exceptionType: "System.DmlException",
+    message: "Insert failed",
+    stackTrace: "Class.OrderController.save: line 12, column 1",
+    ...overrides
+  }
+});
+
+describe("c/logr", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    saveClientLog.mockResolvedValue(true);
   });
 
-  it("persists fluent multi-step unit of work via default save()", async () => {
-    saveClientLog.mockResolvedValue(true);
+  describe("chaining", () => {
+    it("builds a full unit of work with one chain and saves it once", async () => {
+      const saved = await Logr.start("Customer Checkout")
+        .source("checkoutSummary")
+        .tag("Checkout")
+        .tags(["Stripe", "Checkout"])
+        .recordId("801000000000001AAA")
+        .recordIds(["801000000000002AAA"])
+        .add("Cart validated")
+        .debug("Cart payload", { items: 2 })
+        .warn("Slow tax service")
+        .save();
 
-    const logger = Logr.start("Checkout Telemetry")
-      .source("checkoutSummary")
-      .tag("Checkout")
-      .tags(["Stripe", "Checkout"])
-      .recordId("801000000000001AAA")
-      .recordIds(["801000000000002AAA"]);
+      expect(saved).toBe(true);
+      expect(saveClientLog).toHaveBeenCalledTimes(1);
 
-    logger.add("Cart validated");
-    logger.debug("Cart Payload", { items: 2 });
-    logger.warn("Slow response from tax service");
-
-    const saved = await logger.save();
-
-    expect(saved).toBe(true);
-    expect(saveClientLog).toHaveBeenCalledTimes(1);
-    const callArgs = saveClientLog.mock.calls[0][0];
-    expect(callArgs.subject).toBe("Checkout Telemetry");
-    expect(callArgs.level).toBe("WARN");
-    expect(callArgs.source).toBe("checkoutSummary");
-    expect(callArgs.tags).toBe("Checkout, Stripe");
-    expect(callArgs.recordId).toBe("801000000000001AAA, 801000000000002AAA");
-    expect(callArgs.message).toContain("----------");
-    expect(callArgs.saveMode).toBeNull();
-  });
-
-  it("supports saveDirect() and saveViaEvent() explicit save modes", async () => {
-    saveClientLog.mockResolvedValue(true);
-
-    const directLogger = createLogr("Direct Client Log")
-      .source("orderView")
-      .info("Saved directly");
-    await directLogger.saveDirect();
-
-    const eventLogger = createLogr("Event Client Log")
-      .source("orderView")
-      .fine("Saved via event");
-    await eventLogger.saveViaEvent();
-
-    expect(saveClientLog).toHaveBeenCalledTimes(2);
-    expect(saveClientLog.mock.calls[0][0].saveMode).toBe("DIRECT");
-    expect(saveClientLog.mock.calls[1][0].saveMode).toBe("EVENT");
-  });
-
-  it("captures Error stack traces and AuraHandledException details in logError() and logInfo()", async () => {
-    saveClientLog.mockResolvedValue(true);
-
-    const jsError = new TypeError("Cannot read properties of null");
-    await logError({
-      subject: "Payment Crash",
-      error: jsError,
-      source: "paymentForm",
-      tags: ["Payment", "UI"],
-      recordId: "a01000000000001AAA",
-      saveMode: "DIRECT"
+      const args = lastCall();
+      expect(args.subject).toBe("Customer Checkout");
+      expect(args.level).toBe("WARN");
+      expect(args.source).toBe("checkoutSummary");
+      expect(args.tags).toBe("Checkout, Stripe");
+      expect(args.recordId).toBe("801000000000001AAA, 801000000000002AAA");
+      expect(args.message).toContain("| INFO] Cart validated");
+      expect(args.message).toContain(
+        '| DEBUG] Cart payload:\n{\n  "items": 2\n}'
+      );
+      expect(args.message).toContain("\n----------\n");
+      expect(args.stackTrace).toBeNull();
+      expect(args.saveMode).toBeNull();
     });
 
-    await logInfo({
-      subject: "Payment Initiated",
-      message: "User clicked submit",
-      source: "paymentForm",
-      tags: "Payment",
-      recordId: "a01000000000001AAA"
+    it("returns the same logger from every non-save method", () => {
+      const log = Logr.start("Chain");
+      const methods = [
+        () => log.subject("x"),
+        () => log.source("y"),
+        () => log.tag("t"),
+        () => log.tags("a, b"),
+        () => log.recordId("1"),
+        () => log.recordIds(["2"]),
+        () => log.fine("f"),
+        () => log.debug("d"),
+        () => log.info("i"),
+        () => log.add("a"),
+        () => log.warn("w"),
+        () => log.error("e")
+      ];
+      methods.forEach((call) => expect(call()).toBe(log));
     });
 
-    expect(saveClientLog).toHaveBeenCalledTimes(2);
-    const errorArgs = saveClientLog.mock.calls[0][0];
-    expect(errorArgs.level).toBe("ERROR");
-    expect(errorArgs.stackTrace).toContain("TypeError");
-    expect(errorArgs.saveMode).toBe("DIRECT");
+    it("uses sensible defaults when nothing is set", async () => {
+      await Logr.start().save();
 
-    const infoArgs = saveClientLog.mock.calls[1][0];
-    expect(infoArgs.level).toBe("INFO");
-    expect(infoArgs.subject).toBe("Payment Initiated");
+      const args = lastCall();
+      expect(args.subject).toBe("Client Log");
+      expect(args.source).toBe("LWC");
+      expect(args.level).toBe("INFO");
+      expect(args.message).toBe("Client Log");
+      expect(args.tags).toBeNull();
+      expect(args.recordId).toBeNull();
+    });
+
+    it("accepts comma-separated strings for tags and record IDs and ignores blanks", async () => {
+      await Logr.start("Lists")
+        .tags("LWC, Checkout, ,LWC")
+        .recordIds("001A, 001B")
+        .tag(null)
+        .recordId("")
+        .info("ok")
+        .save();
+
+      const args = lastCall();
+      expect(args.tags).toBe("LWC, Checkout");
+      expect(args.recordId).toBe("001A, 001B");
+    });
+
+    it("works with new Logr() just like Logr.start()", async () => {
+      await new Logr("Constructed").info("hi").save();
+      expect(lastCall().subject).toBe("Constructed");
+    });
   });
 
-  it("swallows Apex errors gracefully so client UI never crashes", async () => {
-    saveClientLog.mockRejectedValue(new Error("Network offline"));
+  describe("error()", () => {
+    it("takes a caught JavaScript Error on its own", async () => {
+      await Logr.start("Checkout crashed")
+        .source("checkoutSummary")
+        .error(new TypeError("Cannot read properties of null"))
+        .save();
 
-    const logger = Logr.start("Offline Log").error("Failed action", {
-      body: {
-        exceptionType: "System.CalloutException",
-        message: "Timed out",
-        stackTrace: "Class.X"
-      }
+      const args = lastCall();
+      expect(args.level).toBe("ERROR");
+      expect(args.message).toContain(
+        "| ERROR] TypeError: Cannot read properties of null"
+      );
+      expect(args.stackTrace).toContain("TypeError");
     });
-    const result = await logger.save();
 
-    expect(result).toBe(false);
+    it("takes a label and an Apex error response", async () => {
+      await Logr.start("Save order").error("Save failed", apexError()).save();
+
+      const args = lastCall();
+      expect(args.message).toContain(
+        "| ERROR] Save failed: System.DmlException: Insert failed"
+      );
+      expect(args.stackTrace).toBe(
+        "System.DmlException: Insert failed\nClass.OrderController.save: line 12, column 1"
+      );
+    });
+
+    it("handles Apex errors without a stack trace and list-shaped bodies", async () => {
+      await Logr.start("No stack")
+        .error(apexError({ stackTrace: "" }))
+        .save();
+      expect(lastCall().stackTrace).toBe("System.DmlException: Insert failed");
+
+      await Logr.start("List body")
+        .error({
+          body: [
+            { message: "Field A is required" },
+            { message: "Field B is invalid" }
+          ]
+        })
+        .save();
+      expect(lastCall().message).toContain(
+        "Field A is required; Field B is invalid"
+      );
+    });
+
+    it("takes a plain message without setting a stack trace", async () => {
+      await Logr.start("Validation").error("Quantity must be positive").save();
+
+      const args = lastCall();
+      expect(args.level).toBe("ERROR");
+      expect(args.message).toContain("| ERROR] Quantity must be positive");
+      expect(args.stackTrace).toBeNull();
+    });
+  });
+
+  describe("saving", () => {
+    it("supports saveDirect() and saveViaEvent()", async () => {
+      await Logr.start("Direct").info("a").saveDirect();
+      expect(lastCall().saveMode).toBe("DIRECT");
+
+      await Logr.start("Event").info("b").saveViaEvent();
+      expect(lastCall().saveMode).toBe("EVENT");
+    });
+
+    it("clears steps, level and stack after a successful save but keeps subject, source and tags", async () => {
+      const log = Logr.start("Reusable")
+        .source("orderView")
+        .tag("OMS")
+        .recordId("801A")
+        .error(new Error("first"));
+      await log.save();
+
+      await log.info("second").save();
+      const args = lastCall();
+      expect(args.subject).toBe("Reusable");
+      expect(args.source).toBe("orderView");
+      expect(args.tags).toBe("OMS");
+      expect(args.recordId).toBeNull();
+      expect(args.level).toBe("INFO");
+      expect(args.stackTrace).toBeNull();
+      expect(args.message).not.toContain("first");
+    });
+
+    it("never throws and keeps the steps when Apex fails", async () => {
+      saveClientLog.mockRejectedValueOnce(new Error("Network offline"));
+      const log = Logr.start("Offline").error("Failed action", apexError());
+
+      await expect(log.save()).resolves.toBe(false);
+
+      await log.save();
+      expect(lastCall().message).toContain("Failed action");
+    });
+
+    it("resolves false when Apex reports the log was not saved", async () => {
+      saveClientLog.mockResolvedValueOnce(false);
+      await expect(Logr.start("Disabled").info("x").save()).resolves.toBe(
+        false
+      );
+    });
+  });
+
+  describe("deprecated v1.1.0 helpers", () => {
+    it("still supports createLogr(), logError() and logInfo()", async () => {
+      await createLogr("Legacy").info("ok").save();
+      expect(lastCall().subject).toBe("Legacy");
+
+      await logError({
+        subject: "Payment Crash",
+        error: new TypeError("boom"),
+        source: "paymentForm",
+        tags: ["Payment", "UI"],
+        recordId: "a01A",
+        saveMode: "DIRECT"
+      });
+      let args = lastCall();
+      expect(args.level).toBe("ERROR");
+      expect(args.source).toBe("paymentForm");
+      expect(args.tags).toBe("Payment, UI");
+      expect(args.stackTrace).toContain("TypeError");
+      expect(args.saveMode).toBe("DIRECT");
+
+      await logInfo({
+        subject: "Payment Initiated",
+        message: "Clicked submit",
+        tags: "Payment"
+      });
+      args = lastCall();
+      expect(args.level).toBe("INFO");
+      expect(args.subject).toBe("Payment Initiated");
+      expect(args.message).toContain("Clicked submit");
+    });
   });
 });

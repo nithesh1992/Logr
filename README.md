@@ -177,28 +177,32 @@ Several loggers in one transaction: call `Logr.saveAll()` once at the end. In `D
 
 ### Lightning Web Components
 
+Same chain as Apex. Every method returns the logger, and `save()` never throws.
+
 ```javascript
-import { createLogr, logError } from 'c/logr';
+import Logr from 'c/logr';
 
 async handlePayment() {
-    const log = createLogr('Customer Checkout').source('checkoutSummary')
-        .tag('Stripe').recordId(this.recordId);
+    const log = Logr.start('Customer Checkout')
+        .source('checkoutSummary')
+        .tag('Stripe')
+        .recordId(this.recordId);
+
     log.info('Initializing payment intent');
     try {
         log.debug('Gateway response', await authorizeCard());
     } catch (error) {
-        log.error('Payment failed', error);
+        log.error('Payment failed', error);  // JS Error or Apex error response
     } finally {
-        await log.save();           // never throws; resolves false on failure
+        log.save();                          // resolves false on failure
     }
 }
 
 // One-liner:
-await logError({ subject: 'Checkout UI Crash', error, source: 'checkoutSummary',
-                 tags: 'LWC, Checkout', recordId: this.recordId });
+Logr.start('Checkout UI Crash').source('checkoutSummary').error(error).save();
 ```
 
-`logInfo({ subject, message, ... })` works the same way.
+`error()` takes an error, a message, or both: `.error(error)`, `.error('Payment failed')`, `.error('Payment failed', error)`.
 
 ### Flow
 
