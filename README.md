@@ -3,6 +3,7 @@
 [![Platform: Salesforce](https://img.shields.io/badge/Platform-Salesforce-00A1E0?style=flat-square&logo=salesforce)](https://developer.salesforce.com/)
 [![API Version](https://img.shields.io/badge/API-v68.0-blue?style=flat-square)](https://developer.salesforce.com/)
 [![Code Coverage](https://img.shields.io/badge/Coverage-95%25%2B-brightgreen?style=flat-square)]()
+[![Docs: GitHub Pages](https://img.shields.io/badge/Docs-GitHub%20Pages-0284c7?style=flat-square)](https://nithesh1992.github.io/Logr/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
 **One unit of work, one log record.** Logr is a small logging and telemetry framework for Salesforce. It captures the steps, callouts, DML outcomes and exceptions of a transaction in Apex, Flow and LWC, and saves them as a single readable `Logr_Entry__c`.
