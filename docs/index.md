@@ -34,7 +34,7 @@ features:
     details: Four Apex classes and one trigger, with regex PII masking, five reports, and a nightly cleanup job built in.
 ---
 
-## What a Log Record Looks Like
+## What a Logr Entry Record Looks Like
 
 You read the story of one failure top to bottom, in one place. No joining child rows, no digging through 24-hour debug logs.
 
