@@ -10,13 +10,16 @@
 
 **One unit of work, one log record.** Logr is a small logging and telemetry framework for Salesforce. It captures the steps, callouts, DML outcomes and exceptions of a transaction in Apex, Flow and LWC, and saves them as a single readable `Logr_Entry__c`.
 
+**Individual fields on `Logr_Entry__c`:**
 ```text
-Subject: Order Fulfillment
-Level: ERROR (highest step)
-Source:  OrderService.fulfillOrder (QUEUEABLE)
-Limits:  Time: 506ms | CPU: 48/10000ms | SOQL: 3/100 | DML: 1/150 | Heap: 124/6000KB
+Subject__c:         Order Fulfillment
+Level__c:           ERROR (highest step)
+Source__c:          OrderService.fulfillOrder (QUEUEABLE)
+Governor_Limits__c: Time: 506ms | CPU: 48/10000ms | SOQL: 3/100 | DML: 1/150 | Heap: 124/6000KB
 ```
-```
+
+**Execution trace inside `Body__c`:**
+```text
 [14:22:01.104 | +0ms   | INFO ] Validated order header
 ----------
 [14:22:01.189 | +85ms  | DEBUG] Order lines: [ { "Id": "802g7000000xyz1AAA", "Quantity": 2 } ]

@@ -38,12 +38,16 @@ features:
 
 You read the story of one failure top to bottom, in one place. No joining child rows, no digging through 24-hour debug logs.
 
+**Individual fields on `Logr_Entry__c`:**
+
 ```text
-Subject: Order Fulfillment
-Level:   ERROR (highest step)
-Source:  OrderService.fulfillOrder (QUEUEABLE)
-Limits:  Time: 506ms | CPU: 48/10000ms | SOQL: 3/100 | DML: 1/150 | Heap: 124/6000KB
+Subject__c:         Order Fulfillment
+Level__c:           ERROR (highest step)
+Source__c:          OrderService.fulfillOrder (QUEUEABLE)
+Governor_Limits__c: Time: 506ms | CPU: 48/10000ms | SOQL: 3/100 | DML: 1/150 | Heap: 124/6000KB
 ```
+
+**Execution trace inside `Body__c`:**
 
 ```text
 [14:22:01.104 | +0ms   | INFO ] Validated order header
