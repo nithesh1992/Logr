@@ -34,9 +34,31 @@ features:
     details: Four Apex classes and one trigger, with regex PII masking, five reports, and a nightly cleanup job built in.
 ---
 
+## What a Log Record Looks Like
+
+You read the story of one failure top to bottom, in one place. No joining child rows, no digging through 24-hour debug logs.
+
+```text
+Subject: Order Fulfillment
+Level:   ERROR (highest step)
+Source:  OrderService.fulfillOrder (QUEUEABLE)
+Limits:  Time: 506ms | CPU: 48/10000ms | SOQL: 3/100 | DML: 1/150 | Heap: 124/6000KB
+```
+
+```text
+[14:22:01.104 | +0ms   | INFO ] Validated order header
+----------
+[14:22:01.189 | +85ms  | DEBUG] Order lines: [ { "Id": "802g7000000xyz1AAA", "Quantity": 2 } ]
+----------
+[14:22:01.610 | +506ms | ERROR] SAP Order API
+POST https://api.sap.example.com/v1/orders
+Request Body: {"orderId":"EXT-ORD-9941","email":"[REDACTED-EMAIL]"}
+Status: 503 Service Unavailable
+```
+
 ## One API Across the Stack
 
-Read the story of a transaction top to bottom in one place.
+Write the same fluent chain in Apex and Lightning Web Components.
 
 ::: code-group
 
