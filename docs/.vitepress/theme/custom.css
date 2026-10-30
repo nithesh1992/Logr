@@ -42,14 +42,32 @@
   );
 }
 
+.VPHero .main {
+  max-width: 100% !important;
+}
+
 .VPHero .name {
+  max-width: none !important;
   letter-spacing: -0.03em;
   font-weight: 800;
 }
 
 .VPHero .text {
+  max-width: none !important;
   letter-spacing: -0.02em;
   font-weight: 700;
+}
+
+@media (min-width: 768px) {
+  .VPHero .text {
+    white-space: nowrap;
+    font-size: clamp(2rem, 3.8vw, 3.25rem) !important;
+    line-height: 1.15 !important;
+  }
+}
+
+.VPHero .tagline {
+  max-width: 680px !important;
 }
 
 .VPFeature {
