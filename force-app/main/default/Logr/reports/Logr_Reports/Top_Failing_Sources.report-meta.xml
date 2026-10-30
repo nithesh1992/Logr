@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <Report xmlns="http://soap.sforce.com/2006/04/metadata">
     <columns>
         <field>CUST_NAME</field>
@@ -12,7 +12,8 @@
     <columns>
         <field>CUST_CREATED_DATE</field>
     </columns>
-    <description>Error log entries grouped by originating Source (Apex class, trigger, Flow, or LWC).</description>
+    <description
+  >Error log entries grouped by originating Source (Apex class, trigger, Flow, or LWC).</description>
     <filter>
         <criteriaItems>
             <column>Logr_Entry__c.Level__c</column>

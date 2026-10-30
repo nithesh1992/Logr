@@ -1,8 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Body__c</fullName>
-    <description>Detailed step-by-step log messages, serialized payloads, and callout details separated by horizontal dividers.</description>
-    <inlineHelpText>Chronological log messages and payloads recorded during the unit of work, separated by ----------.</inlineHelpText>
+    <description
+  >Detailed step-by-step log messages, serialized payloads, and callout details separated by horizontal dividers.</description>
+    <inlineHelpText
+  >Chronological log messages and payloads recorded during the unit of work, separated by ----------.</inlineHelpText>
     <label>Body</label>
     <length>131072</length>
     <trackTrending>false</trackTrending>

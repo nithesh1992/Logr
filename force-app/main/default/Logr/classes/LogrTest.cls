@@ -4,11 +4,11 @@
  */
 @IsTest
 @SuppressWarnings(
-  'PMD.ApexUnitTestClassShouldHaveRunAs,PMD.MethodNamingConventions'
+  'PMD.ApexDoc,PMD.ApexUnitTestClassShouldHaveRunAs,PMD.MethodNamingConventions'
 )
-private class LogrTest {
+public class LogrTest {
   @TestSetup
-  private static void setupTestPermissions() {
+  public static void setupTestPermissions() {
     User currentUser = new User(Id = UserInfo.getUserId());
     System.runAs(currentUser) {
       List<PermissionSet> adminPermSets = [
@@ -256,7 +256,7 @@ private class LogrTest {
     // Given
     List<String> twentyIds = new List<String>();
     for (Integer index = 10; index < 30; index++) {
-      twentyIds.add('0010000000000' + index + 'AAA');
+      twentyIds.add('ORD-CORR-00000' + index);
     }
 
     // When
@@ -282,7 +282,7 @@ private class LogrTest {
       'Full list of record IDs should overflow into Body__c'
     );
     Assert.isTrue(
-      entry.Body__c.contains('001000000000029AAA'),
+      entry.Body__c.contains('ORD-CORR-0000029'),
       'Body__c should contain the trailing record ID that overflowed Records__c'
     );
   }
@@ -330,7 +330,10 @@ private class LogrTest {
       'Additional labeled error payload',
       new Map<String, String>{ 'code' => 'E1' }
     );
-    logger.error('Labeled exception overload', new IllegalArgumentException('Labeled exception'));
+    logger.error(
+      'Labeled exception overload',
+      new IllegalArgumentException('Labeled exception')
+    );
     logger.error(new IllegalArgumentException('Direct exception argument'));
     logger.error('Plain string error message');
     logger.add(Blob.valueOf('binary payload'));
@@ -374,7 +377,7 @@ private class LogrTest {
     flowReq.level = 'ERROR';
     flowReq.source = 'Order_After_Save_Flow';
     flowReq.tags = 'Flow, OMS';
-    flowReq.recordId = '801000000000001AAA';
+    flowReq.recordId = 'ORD-CORR-FLOW-1';
     flowReq.faultMessage = 'FIELD_CUSTOM_VALIDATION_EXCEPTION: Order locked';
     flowReq.saveMode = 'DIRECT';
 
@@ -389,7 +392,7 @@ private class LogrTest {
       'ERROR',
       'checkoutSummary',
       'LWC, Stripe',
-      '801000000000002AAA',
+      'ORD-CORR-LWC-2',
       'TypeError: Cannot read properties of undefined\n  at CheckoutSummary.handlePay',
       'DIRECT'
     );

@@ -21,11 +21,7 @@ public without sharing class LogrEventHandler {
       return;
     }
 
-    Integer maxBatchEvents = (testMaxEventsPerBatchOverride != null &&
-      testMaxEventsPerBatchOverride > 0)
-      ? testMaxEventsPerBatchOverride
-      : MAX_EVENTS_PER_BATCH;
-
+    Integer maxBatchEvents = resolveMaxEventsPerBatch();
     List<Logr_Entry__c> entriesToInsert = new List<Logr_Entry__c>();
     String lastProcessedReplayId = null;
     Integer cumulativeChars = 0;
@@ -33,11 +29,7 @@ public without sharing class LogrEventHandler {
     for (Logr_Event__e currentEvent : newEvents) {
       entriesToInsert.add(mapEventToEntry(currentEvent));
       lastProcessedReplayId = currentEvent.ReplayId;
-      cumulativeChars +=
-        (currentEvent.Body__c != null ? currentEvent.Body__c.length() : 0) +
-        (currentEvent.Stack_Trace__c != null
-          ? currentEvent.Stack_Trace__c.length()
-          : 0);
+      cumulativeChars += measureEventChars(currentEvent);
 
       if (
         entriesToInsert.size() >= maxBatchEvents ||
@@ -47,6 +39,30 @@ public without sharing class LogrEventHandler {
       }
     }
 
+    insertEntriesAndSetCheckpoint(entriesToInsert, lastProcessedReplayId);
+  }
+
+  private static Integer resolveMaxEventsPerBatch() {
+    return (testMaxEventsPerBatchOverride != null &&
+      testMaxEventsPerBatchOverride > 0)
+      ? testMaxEventsPerBatchOverride
+      : MAX_EVENTS_PER_BATCH;
+  }
+
+  private static Integer measureEventChars(Logr_Event__e currentEvent) {
+    Integer bodyChars = (currentEvent.Body__c != null)
+      ? currentEvent.Body__c.length()
+      : 0;
+    Integer stackChars = (currentEvent.Stack_Trace__c != null)
+      ? currentEvent.Stack_Trace__c.length()
+      : 0;
+    return bodyChars + stackChars;
+  }
+
+  private static void insertEntriesAndSetCheckpoint(
+    List<Logr_Entry__c> entriesToInsert,
+    String lastProcessedReplayId
+  ) {
     if (!entriesToInsert.isEmpty()) {
       Database.insert(entriesToInsert, false, AccessLevel.SYSTEM_MODE);
     }

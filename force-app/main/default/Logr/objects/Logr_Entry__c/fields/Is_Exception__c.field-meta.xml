@@ -1,9 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Is_Exception__c</fullName>
     <defaultValue>false</defaultValue>
-    <description>Indicates whether an unhandled or caught exception was recorded in this log entry.</description>
-    <inlineHelpText>Checked automatically when an exception or error stack trace is attached to this log entry.</inlineHelpText>
+    <description
+  >Indicates whether an unhandled or caught exception was recorded in this log entry.</description>
+    <inlineHelpText
+  >Checked automatically when an exception or error stack trace is attached to this log entry.</inlineHelpText>
     <label>Is Exception</label>
     <trackTrending>false</trackTrending>
     <type>Checkbox</type>

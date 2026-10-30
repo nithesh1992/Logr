@@ -54,5 +54,7 @@ $RECYCLE.BIN/
 # VitePress build and cache
 docs/.vitepress/cache/
 docs/.vitepress/dist/
+code-analyzer.yml
+
 
 

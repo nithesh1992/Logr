@@ -1,8 +1,8 @@
 {
   "packageDirectories": [
     {
-      "versionName": "v1.1",
-      "versionNumber": "1.1.0.NEXT",
+      "versionName": "v1.2",
+      "versionNumber": "1.2.0.NEXT",
       "path": "force-app/main/default/Logr",
       "default": true,
       "package": "Logr",
@@ -20,6 +20,7 @@
   "packageAliases": {
     "Logr": "0Hog70000004Fy9CAE",
     "Logr@1.0.0-1": "04tg7000000ZBYTAA4",
-    "Logr@1.1.0-1": "04tg7000000ZCRJAA4"
+    "Logr@1.1.0-1": "04tg7000000ZCRJAA4",
+    "Logr@1.2.0-1": "04tg7000000bqZ7AAI"
   }
 }

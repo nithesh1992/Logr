@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <Dashboard xmlns="http://soap.sforce.com/2006/04/metadata">
     <backgroundEndColor>#FFFFFF</backgroundEndColor>
     <backgroundFadeDirection>Diagonal</backgroundFadeDirection>
@@ -15,7 +15,7 @@
                 <drillToDetailEnabled>false</drillToDetailEnabled>
                 <enableHover>false</enableHover>
                 <expandOthers>false</expandOthers>
-                <groupingSortProperties/>
+                <groupingSortProperties />
                 <header>Top Failing Sources</header>
                 <report>Logr_Reports/Top_Failing_Sources</report>
                 <showPercentage>false</showPercentage>
@@ -39,7 +39,7 @@
                 <drillToDetailEnabled>false</drillToDetailEnabled>
                 <enableHover>false</enableHover>
                 <expandOthers>false</expandOthers>
-                <groupingSortProperties/>
+                <groupingSortProperties />
                 <header>30-Day Log Trend</header>
                 <report>Logr_Reports/Daily_Log_Trend</report>
                 <showPercentage>false</showPercentage>
@@ -62,7 +62,7 @@
                 <drillToDetailEnabled>false</drillToDetailEnabled>
                 <enableHover>false</enableHover>
                 <expandOthers>false</expandOthers>
-                <groupingSortProperties/>
+                <groupingSortProperties />
                 <header>Logs by Level</header>
                 <report>Logr_Reports/Logs_by_Level</report>
                 <showPercentage>false</showPercentage>
@@ -126,7 +126,7 @@
                     <hideChatterPhotos>true</hideChatterPhotos>
                     <useReportTableSetting>false</useReportTableSetting>
                 </flexComponentProperties>
-                <groupingSortProperties/>
+                <groupingSortProperties />
                 <header>Recent Live Logs</header>
                 <report>Logr_Reports/Recent_Live_Logs</report>
             </dashboardComponent>
@@ -145,7 +145,7 @@
                 <drillToDetailEnabled>false</drillToDetailEnabled>
                 <enableHover>false</enableHover>
                 <expandOthers>false</expandOthers>
-                <groupingSortProperties/>
+                <groupingSortProperties />
                 <header>Logs by User</header>
                 <report>Logr_Reports/Logs_by_User</report>
                 <showPercentage>false</showPercentage>

@@ -5,19 +5,19 @@
  * and governor-safe persistence.
  */
 @SuppressWarnings(
-  'PMD.ApexCRUDViolation,PMD.CyclomaticComplexity,PMD.CognitiveComplexity,PMD.ExcessiveParameterList,PMD.StdCyclomaticComplexity'
+  'PMD.ApexDoc,PMD.ApexCRUDViolation,PMD.CyclomaticComplexity,PMD.CognitiveComplexity,PMD.ExcessiveParameterList,PMD.StdCyclomaticComplexity'
 )
 public without sharing class LogrUtil {
-  public static final String STEP_DIVIDER = '\n----------\n';
-  public static final Integer MAX_BODY_LENGTH = 130000;
-  public static final Integer BODY_HEAD_LENGTH = 60000;
-  public static final Integer BODY_TAIL_LENGTH = 65000;
-  public static final Integer MAX_STACK_LENGTH = 32000;
-  public static final Integer MAX_TEXT_255 = 255;
-  public static final Integer MAX_USER_LENGTH = 80;
+  private static final String STEP_DIVIDER = '\n----------\n';
+  private static final Integer MAX_BODY_LENGTH = 130000;
+  private static final Integer BODY_HEAD_LENGTH = 60000;
+  private static final Integer BODY_TAIL_LENGTH = 65000;
+  private static final Integer MAX_STACK_LENGTH = 32000;
+  private static final Integer MAX_TEXT_255 = 255;
+  private static final Integer MAX_USER_LENGTH = 80;
   private static final Integer MASK_CHUNK_SIZE = 2000;
 
-  public static final Map<Logr.Level, Integer> LEVEL_RANK = new Map<Logr.Level, Integer>{
+  private static final Map<Logr.Level, Integer> LEVEL_RANK = new Map<Logr.Level, Integer>{
     Logr.Level.FINE => 1,
     Logr.Level.DEBUG => 2,
     Logr.Level.INFO => 3,
@@ -532,7 +532,9 @@ public without sharing class LogrUtil {
       : Logr_Config__c.getInstance();
 
     if (
-      activeSetting == null || (testOverride == null && activeSetting.Id == null)
+      activeSetting == null ||
+      (testOverride == null &&
+      activeSetting.Id == null)
     ) {
       return resolved;
     }
@@ -543,7 +545,8 @@ public without sharing class LogrUtil {
       activeSetting.Default_Save_Mode__c,
       Logr.SaveMode.EVENT
     );
-    resolved.flushDebugOnError = (activeSetting.Flush_Debug_On_Error__c == true);
+    resolved.flushDebugOnError = (activeSetting.Flush_Debug_On_Error__c ==
+    true);
     resolved.maskData = (activeSetting.Mask_Data__c == true);
     if (
       activeSetting.Retention_Days__c != null &&
@@ -554,7 +557,8 @@ public without sharing class LogrUtil {
     return resolved;
   }
 
-  public static Logr.Level parseLevel(
+  @TestVisible
+  private static Logr.Level parseLevel(
     String levelText,
     Logr.Level fallbackLevel
   ) {
@@ -570,7 +574,8 @@ public without sharing class LogrUtil {
     return fallbackLevel;
   }
 
-  public static Logr.SaveMode parseSaveMode(
+  @TestVisible
+  private static Logr.SaveMode parseSaveMode(
     String modeText,
     Logr.SaveMode fallbackMode
   ) {
@@ -663,7 +668,8 @@ public without sharing class LogrUtil {
     }
   }
 
-  public static String formatCalloutSummary(
+  @TestVisible
+  private static String formatCalloutSummary(
     String calloutLabel,
     HttpRequest httpRequest,
     HttpResponse httpResponse
@@ -696,7 +702,8 @@ public without sharing class LogrUtil {
     return String.join(summaryParts, '\n');
   }
 
-  public static String serializePayload(Object payload) {
+  @TestVisible
+  private static String serializePayload(Object payload) {
     if (payload == null) {
       return '';
     }
@@ -716,7 +723,8 @@ public without sharing class LogrUtil {
     }
   }
 
-  public static String formatExceptionDetails(Exception caughtException) {
+  @TestVisible
+  private static String formatExceptionDetails(Exception caughtException) {
     if (caughtException == null) {
       return null;
     }
@@ -738,7 +746,8 @@ public without sharing class LogrUtil {
     return String.join(exceptionLines, '\n');
   }
 
-  public static String packIdsWithinLimit(
+  @TestVisible
+  private static String packIdsWithinLimit(
     List<String> allIds,
     Integer maxChars
   ) {
@@ -757,7 +766,8 @@ public without sharing class LogrUtil {
       : String.join(fittingIds, ', ');
   }
 
-  public static String truncateBodySmart(String rawBody) {
+  @TestVisible
+  private static String truncateBodySmart(String rawBody) {
     if (String.isBlank(rawBody) || rawBody.length() <= MAX_BODY_LENGTH) {
       return rawBody;
     }
@@ -772,7 +782,8 @@ public without sharing class LogrUtil {
       rawBody.substring(rawBody.length() - BODY_TAIL_LENGTH);
   }
 
-  public static String safeTruncate(String inputText, Integer maxLength) {
+  @TestVisible
+  private static String safeTruncate(String inputText, Integer maxLength) {
     if (String.isBlank(inputText)) {
       return inputText;
     }
@@ -781,14 +792,17 @@ public without sharing class LogrUtil {
       : inputText.substring(0, maxLength);
   }
 
-  public static String maskSensitiveText(
+  @TestVisible
+  private static String maskSensitiveText(
     String inputText,
     List<Logr_Data_Mask_Rule__mdt> testRulesOverride
   ) {
     if (String.isBlank(inputText)) {
       return inputText;
     }
-    List<CompiledMaskRule> activeRules = getCompiledMaskRules(testRulesOverride);
+    List<CompiledMaskRule> activeRules = getCompiledMaskRules(
+      testRulesOverride
+    );
     if (activeRules.isEmpty()) {
       return inputText;
     }
@@ -859,7 +873,8 @@ public without sharing class LogrUtil {
     return compiledList;
   }
 
-  public static String buildGovernorLimitsSnapshot(Long elapsedMs) {
+  @TestVisible
+  private static String buildGovernorLimitsSnapshot(Long elapsedMs) {
     Integer heapKb = Limits.getHeapSize() / 1024;
     Integer maxHeapKb = Limits.getLimitHeapSize() / 1024;
     String snapshot =
@@ -885,7 +900,8 @@ public without sharing class LogrUtil {
     return safeTruncate(snapshot, MAX_TEXT_255);
   }
 
-  public static List<Database.SaveResult> persistEntries(
+  @TestVisible
+  private static List<Database.SaveResult> persistEntries(
     List<Logr_Entry__c> builtEntries,
     Logr.SaveMode effectiveMode
   ) {

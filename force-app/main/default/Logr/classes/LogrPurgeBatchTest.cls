@@ -8,36 +8,7 @@
 private class LogrPurgeBatchTest {
   @TestSetup
   private static void setupTestPermissions() {
-    User currentUser = new User(Id = UserInfo.getUserId());
-    System.runAs(currentUser) {
-      List<PermissionSet> adminPermSets = [
-        SELECT Id
-        FROM PermissionSet
-        WHERE Name = 'Logr_Admin'
-        WITH SYSTEM_MODE
-        LIMIT 1
-      ];
-      if (!adminPermSets.isEmpty()) {
-        List<PermissionSetAssignment> existingAssignments = [
-          SELECT Id
-          FROM PermissionSetAssignment
-          WHERE
-            AssigneeId = :UserInfo.getUserId()
-            AND PermissionSetId = :adminPermSets[0].Id
-          WITH SYSTEM_MODE
-          LIMIT 1
-        ];
-        if (existingAssignments.isEmpty()) {
-          Database.insert(
-            new PermissionSetAssignment(
-              AssigneeId = UserInfo.getUserId(),
-              PermissionSetId = adminPermSets[0].Id
-            ),
-            AccessLevel.SYSTEM_MODE
-          );
-        }
-      }
-    }
+    LogrTest.setupTestPermissions();
   }
 
   @IsTest

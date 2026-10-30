@@ -3,7 +3,7 @@
  * Provides a clean, lightweight facade while delegating formatting, masking, and persistence to LogrUtil.
  */
 @SuppressWarnings(
-  'PMD.ExcessivePublicCount,PMD.CyclomaticComplexity,PMD.CognitiveComplexity,PMD.ExcessiveParameterList,PMD.StdCyclomaticComplexity'
+  'PMD.AvoidGlobalModifier,PMD.ApexDoc,PMD.ExcessivePublicCount,PMD.CyclomaticComplexity,PMD.CognitiveComplexity,PMD.ExcessiveParameterList,PMD.StdCyclomaticComplexity'
 )
 global with sharing class Logr {
   global enum Level {
@@ -220,7 +220,12 @@ global with sharing class Logr {
     HttpRequest httpRequest,
     HttpResponse httpResponse
   ) {
-    return LogrUtil.appendCallout(this, calloutLabel, httpRequest, httpResponse);
+    return LogrUtil.appendCallout(
+      this,
+      calloutLabel,
+      httpRequest,
+      httpResponse
+    );
   }
 
   global Logr dmlResults(
@@ -237,7 +242,9 @@ global with sharing class Logr {
   }
 
   global Database.SaveResult save() {
-    return this.save(LogrUtil.resolveConfig(testConfigOverride).defaultSaveMode);
+    return this.save(
+      LogrUtil.resolveConfig(testConfigOverride).defaultSaveMode
+    );
   }
 
   global Database.SaveResult saveDirect() {

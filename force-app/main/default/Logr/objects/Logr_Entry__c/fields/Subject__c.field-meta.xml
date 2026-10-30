@@ -1,9 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Subject__c</fullName>
-    <description>High-level summary or subject of the logged unit of work or error.</description>
+    <description
+  >High-level summary or subject of the logged unit of work or error.</description>
     <externalId>false</externalId>
-    <inlineHelpText>Brief summary of the transaction, operation, or exception recorded in this log entry.</inlineHelpText>
+    <inlineHelpText
+  >Brief summary of the transaction, operation, or exception recorded in this log entry.</inlineHelpText>
     <label>Subject</label>
     <length>255</length>
     <required>false</required>

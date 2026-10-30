@@ -2,7 +2,9 @@
  * @description Schedulable and Batchable job that deletes expired Logr_Entry__c records older than
  * Logr_Config__c.Retention_Days__c (default 30 days) and hard-purges them from the Recycle Bin.
  */
-@SuppressWarnings('PMD.ApexCRUDViolation,PMD.EmptyStatementBlock')
+@SuppressWarnings(
+  'PMD.AvoidGlobalModifier,PMD.ApexCRUDViolation,PMD.EmptyStatementBlock'
+)
 global with sharing class LogrPurgeBatch implements Database.Batchable<SObject>, Schedulable {
   private static final Integer DEFAULT_BATCH_SIZE = 2000;
   private final Integer customRetentionDays;

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <Report xmlns="http://soap.sforce.com/2006/04/metadata">
     <columns>
         <field>CUST_NAME</field>
@@ -15,7 +15,8 @@
     <columns>
         <field>CUST_CREATED_DATE</field>
     </columns>
-    <description>Log Entry records grouped by the stamped running username (User__c).</description>
+    <description
+  >Log Entry records grouped by the stamped running username (User__c).</description>
     <format>Summary</format>
     <groupingsDown>
         <dateGranularity>Day</dateGranularity>
