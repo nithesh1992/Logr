@@ -119,7 +119,6 @@ Read this before putting Logr in a regulated or high-volume org.
 **Missing features**
 
 - No live stream, no archival, no transaction or request ID, no notifications.
-- `Recent Live Logs` is a report, not a stream.
 
 **Quality signals**
 
