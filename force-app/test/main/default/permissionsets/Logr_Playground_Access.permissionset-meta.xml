@@ -4,6 +4,10 @@
   >Grants visibility to the unpackaged Logr Playground LWC tab for end-to-end testing.</description>
     <hasActivationRequired>false</hasActivationRequired>
     <label>Logr Playground Access</label>
+    <classAccesses>
+        <apexClass>LogrPlaygroundController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
     <tabSettings>
         <tab>Logr_Playground</tab>
         <visibility>Visible</visibility>

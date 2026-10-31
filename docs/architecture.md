@@ -6,15 +6,16 @@ Logr stays small so you can read and understand the entire codebase in an aftern
 
 ```text
 force-app/main/default/Logr/
-├── classes/         Logr (API, Flow action, LWC endpoint) · LogrUtil (format, mask, persist)
-│                    LogrEventHandler · LogrPurgeBatch · 4 test classes
-├── triggers/        LogrEventTrigger
-├── lwc/logr/        headless chainable logger + Jest tests
-├── objects/         Logr_Entry__c · Logr_Event__e · Logr_Config__c · Logr_Data_Mask_Rule__mdt
-├── customMetadata/  5 default mask rules
-├── flexipages/ layouts/ tabs/   record page, layout, tab
-├── dashboards/ reports/         1 dashboard, 5 reports
-└── permissionsets/              Logr_Admin · Logr_User
+├── classes/                        Logr (API, Flow action, LWC endpoint) · LogrUtil (format, mask, persist)
+│                                   LogrEventHandler · LogrPurgeBatch · 4 test classes
+├── triggers/                       LogrEventTrigger
+├── platformEventSubscriberConfigs/ LogrEventTriggerConfig (batch size 200, 2 parallel partitions)
+├── lwc/logr/                       headless chainable logger + Jest tests
+├── objects/                        Logr_Entry__c · Logr_Event__e · Logr_Config__c · Logr_Data_Mask_Rule__mdt
+├── customMetadata/                 5 default mask rules
+├── flexipages/ layouts/ tabs/      record page, layout, tab
+├── dashboards/ reports/            1 dashboard, 5 reports
+└── permissionsets/                 Logr_Admin · Logr_User
 ```
 
 ## Persistence Pipeline
@@ -27,6 +28,14 @@ force-app/main/default/Logr/
 3. **Save Mode**:
    - **`EVENT` (default)**: Publishes `Logr_Event__e` with `PublishImmediately`, so the log is not rolled back when the surrounding transaction fails. `LogrEventTrigger` delegates to `LogrEventHandler` to insert `Logr_Entry__c`.
    - **`DIRECT`**: Inserts `Logr_Entry__c` immediately via `Database.insert(..., false, AccessLevel.SYSTEM_MODE)` and **is** rolled back if the transaction fails.
+
+## High-Throughput Event Ingestion (`PlatformEventSubscriberConfig`)
+
+Logr packages `LogrEventTriggerConfig.platformEventSubscriberConfig-meta.xml` to tune how the Salesforce event bus delivers events to `LogrEventTrigger`:
+
+- **Native Batch Sizing (`batchSize = 200`)**: By default, Salesforce delivers up to 2,000 events in `Trigger.new`. If multiple logs contain large JSON bodies or deep stack traces, loading 2,000 records simultaneously can strain the 6 MB Apex heap limit before trigger logic even starts. Setting `batchSize = 200` ensures manageable transaction footprints at the delivery infrastructure layer.
+- **Parallel Subscriptions (`numPartitions = 2`)**: Uses `partitionKey = EventUuid` to distribute event processing across two concurrent worker threads in parallel, doubling ingest throughput and preventing subscriber queue lag during bulk DML or integration surges.
+- **Apex Checkpointing**: `LogrEventHandler` supplements this with `EventBus.TriggerContext.currentContext().setResumeCheckpoint(...)` to safeguard heap limits even if payloads vary widely within a batch.
 
 ## Execution Context & Governor Limits Snapshot
 

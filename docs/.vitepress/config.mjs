@@ -27,11 +27,11 @@ export default defineConfig({
       { text: "LWC", link: "/lwc-guide" },
       { text: "Flow", link: "/flow-guide" },
       {
-        text: "v1.2.0",
+        text: "v1.3.0",
         items: [
           {
-            text: "Release v1.2.0",
-            link: "https://github.com/nithesh1992/Logr/releases/tag/v1.2.0"
+            text: "Release v1.3.0",
+            link: "https://github.com/nithesh1992/Logr/releases/tag/v1.3.0"
           },
           {
             text: "Source Code",

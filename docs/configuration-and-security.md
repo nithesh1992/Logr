@@ -71,3 +71,28 @@ Or run an immediate one-off cleanup with a custom retention window (for example,
 ```apex
 Database.executeBatch(new LogrPurgeBatch(7), 2000);
 ```
+
+## Customizing the Event Subscriber Running User
+
+By default, Logr's `LogrEventTrigger` executes under the standard **Automated Process** user (`autoproc`). In this mode:
+
+- `Logr_Entry__c.CreatedById` is stamped as `Automated Process`.
+- The actual executing user is preserved in `Logr_Entry__c.User__c`.
+
+If your security policies require that system records be created by a named service account, or if you want to capture user-scoped debug traces on the event trigger, you can override the running user in your org:
+
+1. Create or identify a dedicated integration/service user (e.g. `logr.service@yourcompany.com`) and assign the **Logr Admin** permission set.
+2. In Salesforce Setup, go to **Platform Events > Logr Event > Subscriptions**, or deploy an updated `PlatformEventSubscriberConfig` with the target user:
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<PlatformEventSubscriberConfig xmlns="http://soap.sforce.com/2006/04/metadata">
+    <platformEventConsumer>LogrEventTrigger</platformEventConsumer>
+    <batchSize>200</batchSize>
+    <masterLabel>LogrEventTriggerConfig</masterLabel>
+    <isProtected>false</isProtected>
+    <numPartitions>2</numPartitions>
+    <partitionKey>EventUuid</partitionKey>
+    <user>logr.service@yourcompany.com</user>
+</PlatformEventSubscriberConfig>
+```

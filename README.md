@@ -55,6 +55,7 @@ You read the story of one failure top to bottom, in one place. No joining child 
 - **Context stamping.** `Source__c` gets `Class.method (CONTEXT)` using the stack trace and `Quiddity` (SYNC, QUEUEABLE, BATCH, FUTURE, trigger operation, FLOW, AURA, REST…). `User__c` and a governor-limit snapshot are stamped as well.
 - **Per-user levels.** `Logr_Config__c` is a hierarchy custom setting: org default, then profile, then user. Turn on `DEBUG` for one user in production.
 - **PII masking.** Five regex rules ship as custom metadata (credit card, email, US SSN, US phone, IPv4). Add or toggle rules without a deploy. See the limits below.
+- **Event subscriber scaling.** Includes `PlatformEventSubscriberConfig` (`LogrEventTriggerConfig`) with a 200-event batch size to safeguard heap limits and 2 parallel subscription partitions to scale write throughput during high-volume spikes.
 - **Keeps the start and the end of huge logs.** `Body__c` holds about 130,000 characters. If a log is bigger, Logr keeps the first 60,000 and the last 65,000 and replaces the middle with a `[TRUNCATED n CHARS]` marker. Cutting only the end would lose the exception, which is usually the last thing logged. Steps in the middle are lost.
 - **Retention.** `LogrPurgeBatch` deletes logs older than `Retention_Days__c` and empties them from the recycle bin.
 - **Zero config.** Defaults: enabled, `INFO`, `EVENT`, flush on error, masking on, 30 days.
@@ -128,14 +129,14 @@ Read this before putting Logr in a regulated or high-volume org.
 
 ## Install
 
-**Unlocked package (`Logr@1.2.0-1`)**
+**Unlocked package (`Logr@1.3.0-1`)**
 
 ```bash
-sf package install --package 04tg7000000bqZ7AAI --target-org <alias> --apex-compile package --wait 10
+sf package install --package 04tg7000000c7RtAAI --target-org <alias> --apex-compile package --wait 10
 ```
 
-Production: <https://login.salesforce.com/packaging/installPackage.apexp?p0=04tg7000000bqZ7AAI>
-Sandbox: <https://test.salesforce.com/packaging/installPackage.apexp?p0=04tg7000000bqZ7AAI>
+Production: <https://login.salesforce.com/packaging/installPackage.apexp?p0=04tg7000000c7RtAAI>
+Sandbox: <https://test.salesforce.com/packaging/installPackage.apexp?p0=04tg7000000c7RtAAI>
 
 **From source**
 

@@ -110,9 +110,9 @@ async handlePayment() {
 Logr.start("Checkout UI Crash").source("checkoutSummary").error(error).save();
 ```
 
-```bash [Install v1.2.0]
+```bash [Install v1.3.0]
 # Install the Unlocked Package
-sf package install --package 04tg7000000bqZ7AAI --target-org <alias> --apex-compile package --wait 10
+sf package install --package 04tg7000000c7RtAAI --target-org <alias> --apex-compile package --wait 10
 
 # Assign Admin permissions
 sf org assign permset --name Logr_Admin --target-org <alias>

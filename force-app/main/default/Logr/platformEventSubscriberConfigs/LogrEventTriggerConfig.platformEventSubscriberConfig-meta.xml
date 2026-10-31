@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<PlatformEventSubscriberConfig xmlns="http://soap.sforce.com/2006/04/metadata">
+    <platformEventConsumer>LogrEventTrigger</platformEventConsumer>
+    <batchSize>200</batchSize>
+    <masterLabel>LogrEventTriggerConfig</masterLabel>
+    <isProtected>false</isProtected>
+    <numPartitions>2</numPartitions>
+    <partitionKey>EventUuid</partitionKey>
+</PlatformEventSubscriberConfig>

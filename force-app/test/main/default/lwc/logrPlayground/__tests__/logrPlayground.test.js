@@ -1,9 +1,18 @@
 import { createElement } from "lwc";
 import LogrPlayground from "c/logrPlayground";
 import saveClientLog from "@salesforce/apex/Logr.saveClientLog";
+import publishBulkEvents from "@salesforce/apex/LogrPlaygroundController.publishBulkEvents";
 
 jest.mock(
   "@salesforce/apex/Logr.saveClientLog",
+  () => ({
+    default: jest.fn()
+  }),
+  { virtual: true }
+);
+
+jest.mock(
+  "@salesforce/apex/LogrPlaygroundController.publishBulkEvents",
   () => ({
     default: jest.fn()
   }),
@@ -75,5 +84,27 @@ describe("c-logr-playground", () => {
     expect(saveClientLog.mock.calls[1][0].subject).toBe(
       "Checkout Payment Action"
     );
+  });
+
+  it("triggers bulk burst scenario and records activity", async () => {
+    publishBulkEvents.mockResolvedValue(250);
+
+    const element = createElement("c-logr-playground", {
+      is: LogrPlayground
+    });
+    document.body.appendChild(element);
+
+    const bulkBtn = element.shadowRoot.querySelector(
+      '[data-scenario="bulkburst"]'
+    );
+    expect(bulkBtn).not.toBeNull();
+    bulkBtn.click();
+
+    await flushPromises();
+
+    expect(publishBulkEvents).toHaveBeenCalledWith({ count: 250 });
+    const activityItems = element.shadowRoot.querySelectorAll("li.slds-item");
+    expect(activityItems.length).toBe(1);
+    expect(activityItems[0].textContent).toContain("Bulk Burst (250 Events)");
   });
 });

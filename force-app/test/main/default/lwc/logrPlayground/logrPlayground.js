@@ -2,6 +2,7 @@ import { LightningElement, api } from "lwc";
 import { NavigationMixin } from "lightning/navigation";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import Logr from "c/logr";
+import publishBulkEvents from "@salesforce/apex/LogrPlaygroundController.publishBulkEvents";
 
 const LEVEL_OPTIONS = [
   { label: "FINE", value: "FINE" },
@@ -202,6 +203,15 @@ export default class LogrPlayground extends NavigationMixin(LightningElement) {
           "PII Masking Verification",
           "INFO",
           "DEFAULT",
+          saved
+        );
+      } else if (scenario === "bulkburst") {
+        const publishedCount = await publishBulkEvents({ count: 250 });
+        const saved = publishedCount > 0;
+        this.recordActivity(
+          `Bulk Burst (${publishedCount} Events)`,
+          "INFO",
+          "EVENT",
           saved
         );
       }

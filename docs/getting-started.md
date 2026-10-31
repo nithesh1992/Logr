@@ -7,7 +7,7 @@ You can install Logr either as a versioned **Unlocked Package** or by deploying 
 ::: code-group
 
 ```bash [Unlocked Package (Recommended)]
-sf package install --package 04tg7000000bqZ7AAI --wait 10 --target-org <org-alias>
+sf package install --package 04tg7000000c7RtAAI --wait 10 --target-org <org-alias>
 ```
 
 ```bash [Deploy from Source]
@@ -20,8 +20,8 @@ sf project deploy start --source-dir force-app/main/default/Logr --target-org <o
 
 Or install directly in the browser:
 
-- **Production / Developer Edition**: `https://login.salesforce.com/packaging/installPackage.apexp?p0=04tg7000000bqZ7AAI`
-- **Sandbox / Scratch Org**: `https://test.salesforce.com/packaging/installPackage.apexp?p0=04tg7000000bqZ7AAI`
+- **Production / Developer Edition**: `https://login.salesforce.com/packaging/installPackage.apexp?p0=04tg7000000c7RtAAI`
+- **Sandbox / Scratch Org**: `https://test.salesforce.com/packaging/installPackage.apexp?p0=04tg7000000c7RtAAI`
 
 ## 2. Assign Permission Sets
 
