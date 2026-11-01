@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400" width="1200" height="400" fill="none">
+  <defs>
+    <!-- Matte Carbon-Charcoal Background -->
+    <linearGradient id="bannerBg" x1="0" y1="0" x2="1200" y2="400" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#07080A"/>
+      <stop offset="55%" stop-color="#0D0F12"/>
+      <stop offset="100%" stop-color="#12100E"/>
+    </linearGradient>
+
+    <!-- Ambient Warm Amber Glows -->
+    <radialGradient id="leftGlow" cx="230" cy="200" r="185" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F59E0B" stop-opacity="0.22"/>
+      <stop offset="55%" stop-color="#D97706" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#F59E0B" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="rightGlow" cx="950" cy="110" r="220" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#D97706" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#D97706" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Left Squircle & Rim Gradients -->
+    <linearGradient id="squircleFill" x1="120" y1="90" x2="340" y2="310" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#14171A"/>
+      <stop offset="100%" stop-color="#0B0D0F"/>
+    </linearGradient>
+    <linearGradient id="amberRim" x1="120" y1="90" x2="340" y2="310" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FCD34D"/>
+      <stop offset="50%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#D97706"/>
+    </linearGradient>
+
+    <!-- Inner Smoked-Glass Terminal Card -->
+    <linearGradient id="cardFill" x1="160" y1="130" x2="300" y2="270" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#262B31" stop-opacity="0.92"/>
+      <stop offset="100%" stop-color="#14171B" stop-opacity="0.96"/>
+    </linearGradient>
+
+    <!-- Highlighted Amber Log Bar -->
+    <linearGradient id="amberBar" x1="184" y1="208" x2="262" y2="208" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#FBBF24"/>
+    </linearGradient>
+
+    <!-- Architectural Grid Pattern -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#FFFFFF" stroke-opacity="0.04" stroke-width="1"/>
+    </pattern>
+
+    <!-- Glow & Shadow Filters -->
+    <filter id="glow" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="cardShadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000000" flood-opacity="0.55"/>
+    </filter>
+  </defs>
+
+  <!-- Background & Grid -->
+  <rect width="1200" height="400" rx="24" fill="url(#bannerBg)"/>
+  <rect width="1200" height="400" rx="24" fill="url(#grid)"/>
+
+  <!-- Soft Ambient Glows -->
+  <circle cx="230" cy="200" r="185" fill="url(#leftGlow)"/>
+  <circle cx="950" cy="110" r="220" fill="url(#rightGlow)"/>
+
+  <!-- Left App Icon Container -->
+  <rect x="120" y="90" width="220" height="220" rx="48" fill="url(#squircleFill)" stroke="url(#amberRim)" stroke-width="3.5" filter="url(#glow)"/>
+
+  <!-- Inner Smoked-Glass Terminal Card -->
+  <g filter="url(#cardShadow)">
+    <rect x="160" y="130" width="140" height="140" rx="26" fill="url(#cardFill)" stroke="#FFFFFF" stroke-opacity="0.14" stroke-width="1.2"/>
+  </g>
+
+  <!-- Terminal Command Chevron (>) -->
+  <path d="M176 154L186 162L176 170" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Log Stream Bars Inside Card -->
+  <!-- Line 1: Dark Muted Bar -->
+  <rect x="196" y="178" width="70" height="10" rx="5" fill="#0F1215" fill-opacity="0.85"/>
+
+  <!-- Line 2: Highlighted Warm Amber Event Bar -->
+  <rect x="184" y="203" width="76" height="10" rx="5" fill="url(#amberBar)" filter="url(#glow)"/>
+
+  <!-- Line 3: Shorter Dark Muted Bar -->
+  <rect x="184" y="228" width="58" height="10" rx="5" fill="#0F1215" fill-opacity="0.85"/>
+
+  <!-- Live Telemetry Pulse Wave at Bottom-Right of Card -->
+  <path d="M258 240H268L274 223L282 257L287 240H297" stroke="#F59E0B" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
+  <path d="M258 240H268L274 223L282 257L287 240H297" stroke="#FDE68A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Right Wordmark ('Log' in crisp white, ONLY 'r' in warm amber-gold) & Tagline -->
+  <text x="394" y="214" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="112" font-weight="500" letter-spacing="-1.5" fill="#FFFFFF">Log<tspan fill="#F59E0B">r</tspan></text>
+
+  <text x="398" y="268" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="27" font-weight="300" letter-spacing="0.4" fill="#9E988E">Logging &amp; Telemetry for Salesforce</text>
+</svg>

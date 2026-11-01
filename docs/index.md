@@ -5,6 +5,9 @@ hero:
   name: "Logr"
   text: "One unit of work, one log record."
   tagline: "A small logging and telemetry framework for Salesforce. Capture steps, callouts, DML outcomes, and exceptions across Apex, LWC, and Flow in one readable record."
+  image:
+    src: /logr-logo.svg
+    alt: Logr
   actions:
     - theme: brand
       text: Get Started

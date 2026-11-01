@@ -14,8 +14,8 @@
 
   --vp-home-hero-image-background-image: radial-gradient(
     circle,
-    rgba(14, 165, 233, 0.28) 0%,
-    rgba(79, 70, 229, 0.12) 60%,
+    rgba(245, 158, 11, 0.24) 0%,
+    rgba(14, 165, 233, 0.14) 60%,
     transparent 100%
   );
   --vp-home-hero-image-filter: blur(56px);
@@ -60,8 +60,7 @@
 
 @media (min-width: 768px) {
   .VPHero .text {
-    white-space: nowrap;
-    font-size: clamp(2rem, 3.8vw, 3.25rem) !important;
+    font-size: clamp(2rem, 3.4vw, 3rem) !important;
     line-height: 1.15 !important;
   }
 }

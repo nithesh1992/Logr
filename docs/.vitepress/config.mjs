@@ -9,12 +9,14 @@ export default defineConfig({
   lastUpdated: true,
 
   head: [
-    ["meta", { name: "theme-color", content: "#0ea5e9" }],
+    ["link", { rel: "icon", type: "image/svg+xml", href: "/Logr/logr-logo.svg" }],
+    ["meta", { name: "theme-color", content: "#f59e0b" }],
     ["meta", { name: "og:type", content: "website" }],
     ["meta", { name: "og:site_name", content: "Logr for Salesforce" }]
   ],
 
   themeConfig: {
+    logo: "/logr-logo.svg",
     siteTitle: "Logr",
     nav: [
       {

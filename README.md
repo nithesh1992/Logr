@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logr-banner.svg" alt="Logr — Salesforce Telemetry &amp; Logging" width="100%" />
+</p>
+
 # Logr for Salesforce
 
 [![Platform: Salesforce](https://img.shields.io/badge/Platform-Salesforce-00A1E0?style=flat-square&logo=salesforce)](https://developer.salesforce.com/)
