@@ -12,7 +12,7 @@
     <brand>
         <headerColor>#F59E0B</headerColor>
         <logo>Logr_Logo</logo>
-        <logoVersion>1</logoVersion>
+        <logoVersion>2</logoVersion>
         <shouldOverrideOrgTheme>false</shouldOverrideOrgTheme>
     </brand>
     <description>Lightweight Salesforce logging and telemetry framework for Apex, Flow, and LWC.</description>
